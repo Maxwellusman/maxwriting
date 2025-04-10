@@ -15,24 +15,16 @@ export default NextAuth({
       async authorize(credentials) {
         try {
           await connectToDatabase();
-          console.log('Credentials:', credentials);
-          
           const user = await User.findOne({ username: credentials?.username });
-          console.log('User found:', user ? true : false);
           
-          if (!user) {
-            console.log('No user found');
-            return null;
-          }
+          if (!user) return null;
           
-          const isValid = await bcrypt.compare(credentials?.password || '', user.password);
-          console.log('Password valid:', isValid);
+          const isValid = await bcrypt.compare(
+            credentials?.password || '',
+            user.password
+          );
           
-          if (!isValid) {
-            return null;
-          }
-          
-          return { id: user._id.toString(), name: user.username };
+          return isValid ? { id: user._id.toString(), name: user.username } : null;
         } catch (error) {
           console.error('Authorization error:', error);
           return null;
@@ -43,7 +35,7 @@ export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
-    maxAge:   60 * 60, // 1 hour
+    maxAge: 60 * 60, // 1 hour
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -60,22 +52,22 @@ export default NextAuth({
   pages: {
     signIn: '/admin/login',
     error: '/admin/login',
-    signOut: '/admin/login' // Explicit sign out page
+    signOut: '/admin/login'
   },
   debug: process.env.NODE_ENV !== 'production',
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: `next-auth.session-token`, // Simplified name for cross-env compatibility
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
+        // Omit domain for localhost, set only for production
         domain: process.env.NODE_ENV === 'production' 
-          ? 'maxwel-blogs.vercel.app' // no leading dot
-          : 'localhost'
+          ? 'maxwel-blogs.vercel.app' // No trailing slash
+          : undefined
       }
     }
   }
-  
 });

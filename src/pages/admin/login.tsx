@@ -17,6 +17,13 @@ export default function AdminLogin() {
       username,
       password,
     });
+
+    // In your login.tsx handleLogin function
+if (result?.error) {
+  setError(result.error === 'CredentialsSignin' 
+    ? 'Invalid username or password' 
+    : 'Login failed. Please try again.');
+}
   
     if (result?.error) {
       setError(result.error);
