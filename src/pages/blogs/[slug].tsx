@@ -12,9 +12,10 @@ interface BlogPost {
   createdAt: string;
   imageUrl?: string;
   slug: string;
-  author?: string;
   category?: string;
   readTime?: string;
+  writer: string;
+  linkedinUrl?: string;
 }
 
 export default function BlogPost() {
@@ -155,7 +156,6 @@ export default function BlogPost() {
       <Head>
         <title>{post.title} | Your Blog Name</title>
         <meta name="description" content={post.content.substring(0, 150) + '...'} />
-        <meta name="keywords" content={`${post.title}, blog, article`} />
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.content.substring(0, 150) + '...'} />
         <meta property="og:image" content={post.imageUrl || '/default-image.jpg'} />
@@ -180,13 +180,13 @@ export default function BlogPost() {
                 <FiArrowLeft className="mr-2" /> Back to Blog
               </button>
               <div className="flex items-center space-x-4">
-                <button 
+                {/* <button 
                   onClick={() => setIsBookmarked(!isBookmarked)}
                   className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
                   aria-label="Bookmark"
                 >
                   {isBookmarked ? <FaBookmark className="text-indigo-600" /> : <FaRegBookmark />}
-                </button>
+                </button> */}
                 <div className="relative">
                   <button 
                     onClick={() => setIsShareOpen(!isShareOpen)}
@@ -267,10 +267,22 @@ export default function BlogPost() {
               {/* Author and Date */}
               <div className="flex items-center gap-4 mb-10">
                 <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
-                  {post.author?.charAt(0).toUpperCase() || 'A'}
+                  {post.writer?.charAt(0).toUpperCase() || 'A'}
                 </div>
                 <div>
-                  <p className="text-gray-900 font-medium">{post.author || 'Anonymous'}</p>
+                  <p className="text-gray-900 font-medium">
+                    {post.writer || 'Anonymous'}
+                    {post.linkedinUrl && (
+                      <a 
+                        href={post.linkedinUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-600 hover:text-blue-800"
+                      >
+                        <FaLinkedin className="inline" />
+                      </a>
+                    )}
+                  </p>
                   <div className="flex items-center text-gray-500 text-sm">
                     <FiCalendar className="mr-1" />
                     <span>{formatDate(post.createdAt)}</span>
@@ -324,19 +336,32 @@ export default function BlogPost() {
             </div>
           </article>
 
-          {/* Author Bio (optional) */}
-          {post.author && (
+          {/* Author Bio */}
+          {post.writer && (
             <div className="mt-12 bg-white rounded-2xl shadow-xl p-8">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex-shrink-0">
                   <div className="h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center text-gray-500 text-2xl font-bold">
-                    {post.author.charAt(0).toUpperCase()}
+                    {post.writer.charAt(0).toUpperCase()}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">About {post.author}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">About '{post.writer}'</h3>
                   <p className="text-gray-600">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                    {post.linkedinUrl && (
+                      <a 
+                        href={post.linkedinUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-2"
+                      >
+                        <FaLinkedin className="mr-1" /> Connect on LinkedIn
+                      </a>
+                    )}
+                  </p>
+                  <p className="text-gray-600">
+                    {post.writer} is a contributor to our blog. 
+                    {post.linkedinUrl && ' Connect with them on LinkedIn to learn more about their work.'}
                   </p>
                 </div>
               </div>

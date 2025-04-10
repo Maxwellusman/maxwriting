@@ -13,6 +13,8 @@ interface BlogPostData {
   metaDescription?: string;
   keywords?: string[];
   focusKeyword?: string;
+  writer: string; // Added field
+  linkedinUrl?: string; // Added field
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -36,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Get posts with pagination and sorting
         const posts = await BlogPost.find({})
-          .select('title slug excerpt imageUrl createdAt updatedAt')
+          .select('title slug excerpt imageUrl createdAt updatedAt writer') // Added writer to select
           .sort({ [sortBy]: sortOrder })
           .skip(skip)
           .limit(limit)
@@ -75,14 +77,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           metaTitle,
           metaDescription,
           keywords,
-          focusKeyword
+          focusKeyword,
+          writer, // Added field
+          linkedinUrl // Added field
         } = req.body as BlogPostData;
 
         // Validate required fields
-        if (!title || !content || !slug) {
+        if (!title || !content || !slug || !writer) { // Added writer to required fields
           return res.status(400).json({
             success: false,
-            error: 'Title, content, and slug are required'
+            error: 'Title, content, slug, and writer are required'
           });
         }
 
@@ -108,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ? keywords.map(k => k.trim()).filter(k => k.length > 0)
           : [];
 
-        // Create new post with all SEO fields
+        // Create new post with all fields
         const newPost = new BlogPost({ 
           title: title.trim(),
           content: content.trim(),
@@ -118,7 +122,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           metaTitle: metaTitle?.trim(),
           metaDescription: metaDescription?.trim(),
           keywords: cleanedKeywords,
-          focusKeyword: focusKeyword?.trim()
+          focusKeyword: focusKeyword?.trim(),
+          writer: writer.trim(), // Make sure this is included
+          linkedinUrl: linkedinUrl?.trim() // Make sure this is included
         });
 
         await newPost.save();
@@ -129,6 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             _id: newPost._id,
             title: newPost.title,
             slug: newPost.slug,
+            writer: newPost.writer, // Added to response
             createdAt: newPost.createdAt,
             updatedAt: newPost.updatedAt
           }

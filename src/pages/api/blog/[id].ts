@@ -1,112 +1,181 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import connectToDatabase from '@/lib/mongodb';
-import BlogPost from '@/models/BlogPost';
+import { NextApiRequest, NextApiResponse } from 'next';
+import connectToDatabase from '../../../lib/mongodb';
+import BlogPost from '../../../models/BlogPost';
 import mongoose from 'mongoose';
 
-interface BlogPostResponse {
-  _id: string;
-  title: string;
-  content: string;
-  slug: string;
-  imageUrl?: string;
-}
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await connectToDatabase();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  console.log(`Incoming ${req.method} request for /api/blog/${req.query.id}`);
-  
-  try {
-    await connectToDatabase();
-    const { id } = req.query;
+  const { id } = req.query;
 
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id as string)) {
-      console.log('Invalid ID format:', id);
-      return res.status(400).json({ error: 'Invalid ID format' });
-    }
+  switch (req.method) {
+    case 'GET':
+      try {
+        if (!mongoose.Types.ObjectId.isValid(id as string)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Invalid post ID'
+          });
+        }
 
-    switch (req.method) {
-      case 'GET':
         const post = await BlogPost.findById(id).lean();
+
         if (!post) {
-          return res.status(404).json({ error: 'Post not found' });
+          return res.status(404).json({
+            success: false,
+            error: 'Post not found'
+          });
         }
-        return res.status(200).json({
-          _id: post._id.toString(),
-          title: post.title,
-          content: post.content,
-          slug: post.slug,
-          imageUrl: post.imageUrl || null,
+
+        res.status(200).json({
+          success: true,
+          data: post
         });
+      } catch (error) {
+        console.error('Error fetching post:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to fetch post',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+      break;
 
-      case 'PUT':
-        const { title, content, slug, imageUrl } = req.body;
-        
-        if (!title?.trim() || !content?.trim()) {
-          console.log('Missing title or content');
-          return res.status(400).json({ error: 'Title and content are required' });
-        }
-        const updateData: {
-          title: string;
-          content: string;
-          updatedAt: Date;
-          slug: string;
-          imageUrl?: string;
-        } = { 
-          title: title.trim(), 
-          content: content.trim(),
-          updatedAt: new Date(),
-          slug: slug || title.trim().toLowerCase().replace(/\s+/g, '-')
-        };
+    case 'PUT':
+      try {
+        const { 
+          title, 
+          content, 
+          slug, 
+          imageUrl,
+          excerpt,
+          metaTitle,
+          metaDescription,
+          keywords,
+          focusKeyword,
+          writer,
+          linkedinUrl
+        } = req.body;
 
-        // Only update imageUrl if it was provided (could be empty string to remove image)
-        if (typeof imageUrl !== 'undefined') {
-          updateData.imageUrl = imageUrl;
+        // Validate required fields
+        if (!title || !content || !slug || !writer) {
+          return res.status(400).json({
+            success: false,
+            error: 'Title, content, slug, and writer are required'
+          });
         }
+
+        // Validate slug format
+        if (!/^[a-z0-9-]+$/.test(slug)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Slug can only contain lowercase letters, numbers, and hyphens'
+          });
+        }
+
+        // Check for existing slug with different ID
+        const existingPost = await BlogPost.findOne({ slug, _id: { $ne: id } });
+        if (existingPost) {
+          return res.status(400).json({
+            success: false,
+            error: 'Slug already exists for another post'
+          });
+        }
+
+        // Clean and validate keywords
+        const cleanedKeywords: string[] = keywords 
+          ? keywords.map((k: string) => k.trim()).filter((k: string) => k.length > 0)
+          : [];
 
         const updatedPost = await BlogPost.findByIdAndUpdate(
           id,
-          updateData,
-          { new: true, runValidators: true }
-        ).lean<BlogPostResponse>();
+          { 
+            title: title.trim(),
+            content: content.trim(),
+            slug: slug.trim(),
+            imageUrl,
+            excerpt: excerpt?.trim(),
+            metaTitle: metaTitle?.trim(),
+            metaDescription: metaDescription?.trim(),
+            keywords: cleanedKeywords,
+            focusKeyword: focusKeyword?.trim(),
+            writer: writer.trim(),
+            linkedinUrl: linkedinUrl?.trim()
+          },
+          { new: true }
+        );
 
         if (!updatedPost) {
-          return res.status(404).json({ error: 'Post not found' });
+          return res.status(404).json({
+            success: false,
+            error: 'Post not found'
+          });
         }
 
-        return res.status(200).json({
-          _id: updatedPost._id.toString(),
-          title: updatedPost.title,
-          content: updatedPost.content,
-          slug: updatedPost.slug,
-          imageUrl: updatedPost.imageUrl || null,
+        res.status(200).json({
+          success: true,
+          data: updatedPost
         });
-
-      case 'DELETE':
-        const deletedPost = await BlogPost.findByIdAndDelete(id).lean<BlogPostResponse>();
+      } catch (error) {
+        console.error('Error updating post:', error);
         
-        if (!deletedPost) {
-          console.log('Post not found for deletion:', id);
-          return res.status(404).json({ error: 'Post not found' });
+        if (error instanceof mongoose.Error && error.name === 'MongoServerError' && 
+            (error as any).code === 11000) {
+          return res.status(400).json({
+            success: false,
+            error: 'Slug must be unique',
+            message: 'A post with this slug already exists'
+          });
         }
-        return res.status(200).json({
-          _id: deletedPost._id.toString(),
-          title: deletedPost.title,
-          content: deletedPost.content,
-          slug: deletedPost.slug,
-          imageUrl: deletedPost.imageUrl || null,
-        });
 
-      default:
-        res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
-        return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
-    }
-  } catch (err) {
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: err instanceof Error ? err.message : 'Unknown error'
-    });
+        res.status(500).json({
+          success: false,
+          error: 'Failed to update post',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+      break;
+
+    case 'DELETE':
+      try {
+        if (!mongoose.Types.ObjectId.isValid(id as string)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Invalid post ID'
+          });
+        }
+
+        const deletedPost = await BlogPost.findByIdAndDelete(id);
+
+        if (!deletedPost) {
+          return res.status(404).json({
+            success: false,
+            error: 'Post not found'
+          });
+        }
+
+        res.status(200).json({
+          success: true,
+          data: {
+            message: 'Post deleted successfully',
+            postId: id
+          }
+        });
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to delete post',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+      break;
+
+    default:
+      res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
+      res.status(405).json({
+        success: false,
+        error: `Method ${req.method} Not Allowed`
+      });
   }
 }

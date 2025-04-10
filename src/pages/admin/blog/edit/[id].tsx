@@ -19,6 +19,8 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface BlogPostProps {
   post: {
@@ -32,6 +34,8 @@ interface BlogPostProps {
     metaDescription?: string;
     keywords?: string[];
     focusKeyword?: string;
+    writer?: string;
+    linkedinUrl?: string;
     createdAt: string;
     updatedAt: string;
   };
@@ -49,13 +53,26 @@ export default function EditPost({ post }: BlogPostProps) {
   const [metaDescription, setMetaDescription] = useState(post.metaDescription || '');
   const [keywords, setKeywords] = useState(post.keywords?.join(', ') || '');
   const [focusKeyword, setFocusKeyword] = useState(post.focusKeyword || '');
+  const [writer, setWriter] = useState(post.writer || '');
+  const [linkedinUrl, setLinkedinUrl] = useState(post.linkedinUrl || '');
   const [seoScore, setSeoScore] = useState(0);
-  const [wordCount, setWordCount] = useState(0);
-  
+  const [contentStats, setContentStats] = useState({
+    titleLength: post.title.length,
+    excerptLength: post.excerpt?.length || 0,
+    metaDescLength: post.metaDescription?.length || 0,
+    contentWords: 0,
+    contentSizeKB: 0,
+    imageCount: (post.content.match(/<img/g) || []).length,
+    h2Count: (post.content.match(/<h2/g) || []).length,
+    h3Count: (post.content.match(/<h3/g) || []).length,
+    linkCount: (post.content.match(/<a /g) || []).length,
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorImageInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  // Tiptap Editor with all extensions
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -146,10 +163,32 @@ export default function EditPost({ post }: BlogPostProps) {
       },
     },
     onUpdate: () => {
-      const currentContent = editor?.getText() || '';
-      setWordCount(currentContent.split(/\s+/).filter(Boolean).length);
+      updateContentStats();
     },
   });
+
+  const updateContentStats = () => {
+    const content = editor?.getHTML() || '';
+    const textContent = editor?.getText() || '';
+    const contentSizeBytes = new Blob([content]).size;
+    const contentSizeKB = Math.round(contentSizeBytes / 1024);
+
+    if (contentSizeKB > 2048) {
+      toast.error('Content size exceeds 2MB limit! Please reduce content size.');
+    }
+
+    setContentStats({
+      titleLength: title.length,
+      excerptLength: excerpt.length,
+      metaDescLength: metaDescription.length,
+      contentWords: textContent.split(/\s+/).filter(Boolean).length,
+      contentSizeKB,
+      imageCount: (content.match(/<img/g) || []).length,
+      h2Count: (content.match(/<h2/g) || []).length,
+      h3Count: (content.match(/<h3/g) || []).length,
+      linkCount: (content.match(/<a /g) || []).length,
+    });
+  };
 
   useEffect(() => {
     if (editor && !editor.isDestroyed && post.content) {
@@ -167,7 +206,7 @@ export default function EditPost({ post }: BlogPostProps) {
       });
 
       editor.commands.setContent(doc.body.innerHTML);
-      setWordCount(editor.getText().split(/\s+/).filter(Boolean).length);
+      updateContentStats();
     }
   }, [post.content, editor]);
 
@@ -182,42 +221,35 @@ export default function EditPost({ post }: BlogPostProps) {
   useEffect(() => {
     let score = 0;
     
-    // Title check (should contain focus keyword and be 50-60 chars)
     if (title.length >= 50 && title.length <= 60) score += 20;
     if (focusKeyword && title.toLowerCase().includes(focusKeyword.toLowerCase())) score += 15;
     
-    // Content length check (at least 300 words)
+    const wordCount = contentStats.contentWords;
     if (wordCount >= 300) score += 15;
     
-    // Meta description check (should be 120-160 chars)
     const desc = metaDescription || excerpt;
     if (desc.length >= 120 && desc.length <= 160) score += 15;
     
-    // Image check
     if (imagePreview) score += 10;
     
-    // Headings check (should have at least one H2)
-    const hasH2 = editor?.getHTML().includes('<h2') || false;
-    if (hasH2) score += 10;
+    if (contentStats.h2Count > 0) score += 10;
     
-    // Internal links check
-    const hasLinks = editor?.getHTML().includes('<a ') || false;
-    if (hasLinks) score += 5;
+    if (contentStats.linkCount > 0) score += 5;
     
-    // Keywords in content
     if (focusKeyword && editor?.getText().toLowerCase().includes(focusKeyword.toLowerCase())) {
       score += 10;
     }
     
+    if (writer) score += 5;
+    
     setSeoScore(Math.min(100, score));
-  }, [title, excerpt, metaDescription, focusKeyword, editor, imagePreview, wordCount]);
+  }, [title, excerpt, metaDescription, focusKeyword, editor, imagePreview, contentStats, writer]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
     setSlug(newTitle.toLowerCase().replace(/\s+/g, '-'));
     
-    // Auto-generate meta title if empty
     if (!metaTitle) {
       setMetaTitle(newTitle.length > 60 ? newTitle.substring(0, 57) + '...' : newTitle);
     }
@@ -226,6 +258,10 @@ export default function EditPost({ post }: BlogPostProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size exceeds 2MB limit!');
+        return;
+      }
       setImage(file);
       setRemoveImage(false);
       const reader = new FileReader();
@@ -239,6 +275,10 @@ export default function EditPost({ post }: BlogPostProps) {
   const addDeviceImageToEditor = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size exceeds 2MB limit!');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         editor?.chain().focus().setImage({ src: reader.result as string }).run();
@@ -251,10 +291,7 @@ export default function EditPost({ post }: BlogPostProps) {
     const previousUrl = editor?.getAttributes('link').href;
     const url = window.prompt('URL', previousUrl);
 
-    if (url === null) {
-      return;
-    }
-
+    if (url === null) return;
     if (url === '') {
       editor?.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
@@ -272,7 +309,58 @@ export default function EditPost({ post }: BlogPostProps) {
     }
   };
 
+  const getSeoRecommendations = () => {
+    const recommendations = [];
+    
+    if (title.length < 50 || title.length > 60) {
+      recommendations.push('Title should be 50-60 characters');
+    }
+    
+    if (!focusKeyword) {
+      recommendations.push('Add a focus keyword for better SEO');
+    } else {
+      if (!title.toLowerCase().includes(focusKeyword.toLowerCase())) {
+        recommendations.push('Include focus keyword in title');
+      }
+      if (!slug.includes(focusKeyword.toLowerCase())) {
+        recommendations.push('Include focus keyword in slug');
+      }
+    }
+    
+    if (contentStats.contentWords < 300) {
+      recommendations.push('Content should be at least 300 words');
+    }
+    
+    if (contentStats.h2Count === 0) {
+      recommendations.push('Add at least one H2 heading');
+    }
+    
+    if (contentStats.imageCount === 0) {
+      recommendations.push('Add at least one image');
+    }
+    
+    if (contentStats.linkCount === 0) {
+      recommendations.push('Add internal links to other posts');
+    }
+    
+    if (!imagePreview) {
+      recommendations.push('Add a featured image');
+    }
+    
+    return recommendations;
+  };
+
   const handleUpdate = async () => {
+    if (contentStats.contentSizeKB > 2048) {
+      toast.error('Content size exceeds 2MB limit! Cannot update.');
+      return;
+    }
+
+    if (!writer) {
+      toast.error('Please specify the writer name');
+      return;
+    }
+
     setIsUpdating(true);
     
     try {
@@ -328,6 +416,8 @@ export default function EditPost({ post }: BlogPostProps) {
           metaDescription: metaDescription || undefined,
           keywords: keywords.split(',').map(k => k.trim()).filter(k => k),
           focusKeyword,
+          writer,
+          linkedinUrl,
         }),
       });
 
@@ -337,10 +427,11 @@ export default function EditPost({ post }: BlogPostProps) {
         throw new Error(data.error || 'Failed to update post');
       }
 
-      router.push('/admin/blog');
+      toast.success('Blog post updated successfully!');
+      setTimeout(() => router.push('/admin/blog'), 2000);
     } catch (error) {
       console.error('Update error:', error);
-      alert(error instanceof Error ? error.message : 'Update failed');
+      toast.error(error instanceof Error ? error.message : 'Update failed');
     } finally {
       setIsUpdating(false);
     }
@@ -348,10 +439,54 @@ export default function EditPost({ post }: BlogPostProps) {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
+      <ToastContainer position="top-right" autoClose={5000} />
+      
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-center mb-8">Edit Blog Post</h1>
-        
-        {/* SEO Score Indicator */}
+
+        {/* Real-time Content Stats */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+          <div className="text-center border-r pr-4">
+            <div className="font-semibold">Title</div>
+            <div className={`text-lg ${contentStats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
+              {contentStats.titleLength}/60
+            </div>
+          </div>
+          <div className="text-center border-r pr-4">
+            <div className="font-semibold">Meta Desc</div>
+            <div className={`text-lg ${contentStats.metaDescLength > 160 ? 'text-red-500' : 'text-green-500'}`}>
+              {contentStats.metaDescLength}/160
+            </div>
+          </div>
+          <div className="text-center border-r pr-4">
+            <div className="font-semibold">Words</div>
+            <div className="text-lg">
+              {contentStats.contentWords}
+              <span className="block text-xs">{contentStats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
+            </div>
+          </div>
+          <div className="text-center border-r pr-4">
+            <div className="font-semibold">Images</div>
+            <div className="text-lg">
+              {contentStats.imageCount}
+              <span className="block text-xs">{contentStats.imageCount === 0 ? 'Add images' : 'Good'}</span>
+            </div>
+          </div>
+          <div className="text-center border-r pr-4">
+            <div className="font-semibold">Headings</div>
+            <div className="text-lg">
+              H2: {contentStats.h2Count}, H3: {contentStats.h3Count}
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold">Size</div>
+            <div className={`text-lg ${contentStats.contentSizeKB > 2048 ? 'text-red-500' : 'text-green-500'}`}>
+              {(contentStats.contentSizeKB / 1024).toFixed(2)}MB
+            </div>
+          </div>
+        </div>
+
+        {/* SEO Score and Recommendations */}
         <div className="mb-6 bg-white p-4 rounded-lg shadow">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
@@ -365,25 +500,17 @@ export default function EditPost({ post }: BlogPostProps) {
               ></div>
             </div>
           </div>
-          <div className="text-sm text-gray-600">
-            {seoScore >= 80 ? 'Excellent! Your post is well optimized for SEO.' :
-             seoScore >= 50 ? 'Good, but could be improved.' : 
-             'Needs improvement for better search visibility.'}
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-            <div className={`p-2 rounded ${title.length >= 50 && title.length <= 60 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              Title Length: {title.length}/60
+          
+          {seoScore < 80 && (
+            <div className="mt-4">
+              <h3 className="font-semibold mb-2">Recommendations:</h3>
+              <ul className="list-disc pl-5 text-sm text-gray-700">
+                {getSeoRecommendations().map((rec, index) => (
+                  <li key={index}>{rec}</li>
+                ))}
+              </ul>
             </div>
-            <div className={`p-2 rounded ${wordCount >= 300 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              Word Count: {wordCount} (min 300)
-            </div>
-            <div className={`p-2 rounded ${(metaDescription || excerpt).length >= 120 && (metaDescription || excerpt).length <= 160 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              Meta Desc: {(metaDescription || excerpt).length}/160
-            </div>
-            <div className={`p-2 rounded ${imagePreview ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              Featured Image: {imagePreview ? '✓' : 'Missing'}
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -393,9 +520,6 @@ export default function EditPost({ post }: BlogPostProps) {
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Title <span className="text-red-500">*</span>
-                  <span className="text-xs font-normal text-gray-500 ml-2">
-                    {title.length}/60 recommended characters
-                  </span>
                 </label>
                 <input
                   type="text"
@@ -422,20 +546,43 @@ export default function EditPost({ post }: BlogPostProps) {
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                {focusKeyword && !slug.includes(focusKeyword.toLowerCase()) && (
-                  <p className="text-xs text-red-500 mt-1">Consider including your focus keyword in the slug</p>
-                )}
+              </div>
+
+              {/* Writer and LinkedIn */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Writer <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={writer}
+                    onChange={(e) => setWriter(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    LinkedIn Profile URL
+                  </label>
+                  <input
+                    type="url"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://linkedin.com/in/username"
+                  />
+                </div>
               </div>
 
               {/* Editor Content */}
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Content <span className="text-red-500">*</span>
-                  <span className="text-xs font-normal text-gray-500 ml-2">
-                    {wordCount} words (minimum 300 recommended)
-                  </span>
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
+                  {/* Editor toolbar buttons */}
                   <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -631,7 +778,6 @@ export default function EditPost({ post }: BlogPostProps) {
               <div className="mb-4 p-4 border rounded-lg bg-blue-50">
                 <h3 className="font-bold text-lg mb-3 text-blue-800">SEO Settings</h3>
                 
-                {/* Focus Keyword */}
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-1">Focus Keyword</label>
                   <input
@@ -641,18 +787,11 @@ export default function EditPost({ post }: BlogPostProps) {
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="main keyword for this post"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    The primary keyword you want to rank for
-                  </p>
                 </div>
 
-                {/* Meta Title */}
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-1">
                     Meta Title
-                    <span className="text-xs font-normal text-gray-500 ml-2">
-                      {metaTitle.length}/60 recommended
-                    </span>
                   </label>
                   <input
                     type="text"
@@ -661,21 +800,11 @@ export default function EditPost({ post }: BlogPostProps) {
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     maxLength={70}
                   />
-                  {focusKeyword && !metaTitle.toLowerCase().includes(focusKeyword.toLowerCase()) && (
-                    <p className="text-xs text-red-500 mt-1">Include focus keyword for better SEO</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Title that appears in search results
-                  </p>
                 </div>
 
-                {/* Meta Description */}
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-1">
                     Meta Description
-                    <span className="text-xs font-normal text-gray-500 ml-2">
-                      {metaDescription.length}/160 recommended
-                    </span>
                   </label>
                   <textarea
                     value={metaDescription}
@@ -684,21 +813,11 @@ export default function EditPost({ post }: BlogPostProps) {
                     rows={3}
                     maxLength={170}
                   />
-                  {focusKeyword && !metaDescription.toLowerCase().includes(focusKeyword.toLowerCase()) && (
-                    <p className="text-xs text-red-500 mt-1">Consider including focus keyword</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Summary that appears in search results
-                  </p>
                 </div>
 
-                {/* Excerpt */}
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-1">
                     Excerpt
-                    <span className="text-xs font-normal text-gray-500 ml-2">
-                      {excerpt.length}/160 recommended
-                    </span>
                   </label>
                   <textarea
                     value={excerpt}
@@ -707,12 +826,8 @@ export default function EditPost({ post }: BlogPostProps) {
                     rows={3}
                     maxLength={170}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Short summary displayed in blog listings
-                  </p>
                 </div>
 
-                {/* Keywords */}
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-1">Keywords</label>
                   <input
@@ -722,21 +837,20 @@ export default function EditPost({ post }: BlogPostProps) {
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     placeholder="comma, separated, keywords"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Additional relevant keywords for this post
-                  </p>
                 </div>
               </div>
 
-              {/* Publish Button */}
+              {/* Update Button */}
               <button
                 onClick={handleUpdate}
-                disabled={isUpdating}
+                disabled={isUpdating || contentStats.contentSizeKB > 2048}
                 className={`w-full px-4 py-3 rounded-lg text-white font-bold ${
-                  isUpdating ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+                  isUpdating ? 'bg-blue-400' : 
+                  contentStats.contentSizeKB > 2048 ? 'bg-red-400' : 'bg-blue-600 hover:bg-blue-700'
                 } transition`}
               >
-                {isUpdating ? 'Updating...' : 'Update Post'}
+                {isUpdating ? 'Updating...' : 
+                 contentStats.contentSizeKB > 2048 ? 'Content too large (2MB max)' : 'Update Post'}
               </button>
             </div>
           </div>
@@ -785,6 +899,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           metaTitle: blog.metaTitle || null,
           metaDescription: blog.metaDescription || null,
           keywords: blog.keywords || [],
+          focusKeyword: blog.focusKeyword || null,
+          writer: blog.writer || null,
+          linkedinUrl: blog.linkedinUrl || null,
           createdAt: blog.createdAt.toISOString(),
           updatedAt: blog.updatedAt.toISOString(),
         },

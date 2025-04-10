@@ -5,10 +5,13 @@ export interface BlogPostDocument extends Document {
   content: string;
   slug: string;
   imageUrl: string;
-  excerpt: string; // Add excerpt for meta descriptions
-  metaTitle: string; // Custom meta title
-  metaDescription: string; // Custom meta description
-  keywords: string[]; // SEO keywords
+  excerpt: string;
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  focusKeyword: string;
+  writer: string; // Added field
+  linkedinUrl: string; // Added field
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,10 +26,13 @@ const BlogPostSchema = new Schema<BlogPostDocument>(
     content: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
     imageUrl: { type: String },
-    excerpt: { type: String, maxlength: 160 }, // Optimal length for meta descriptions
-    metaTitle: { type: String, maxlength: 60 }, // Optimal length for meta titles
+    excerpt: { type: String, maxlength: 160 },
+    metaTitle: { type: String, maxlength: 60 },
     metaDescription: { type: String, maxlength: 160 },
     keywords: [{ type: String }],
+    focusKeyword: { type: String },
+    writer: { type: String, required: true }, // Added as required field
+    linkedinUrl: { type: String } // Added as optional field
   },
   {
     timestamps: true,

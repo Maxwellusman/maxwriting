@@ -1,6 +1,7 @@
 import { getSession, signOut } from 'next-auth/react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
+import AdminLayout from '@/components/AdminLayout';
 
 export default function AdminDashboard() {
   const handleSignOut = async () => {
@@ -8,7 +9,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <AdminLayout>
+    <div className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-center mb-8">Admin Dashboard</h1>
         <div className="space-y-4">
@@ -33,6 +35,7 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
 
