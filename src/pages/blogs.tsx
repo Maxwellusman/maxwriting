@@ -96,7 +96,7 @@ export default function Blogs() {
           </header>
 
           {loading ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {[...Array(pageSize)].map((_, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="animate-pulse bg-gray-200 h-48 w-full"></div>
@@ -110,7 +110,7 @@ export default function Blogs() {
             </div>
           ) : posts.length > 0 ? (
             <>
-              <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                 {posts.map((post) => (
                   <article
                     key={post._id}
