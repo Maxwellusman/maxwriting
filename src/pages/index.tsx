@@ -26,7 +26,7 @@ const index = () => {
             </div>
             <div className='col-span-2 lg:col-span-1 flex justify-center items-center'>
               <Image
-                src='/images/companylogo1.jpg'
+                src='/images/content1.jpg'
                 width={500}
                 height={500}
                 alt='SEO'
@@ -43,7 +43,7 @@ const index = () => {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-center justify-center'>
             <div className='col-span-2 lg:col-span-1 flex justify-center items-center'>
               <Image
-                src='/images/companylogo1.jpg'
+                src='/images/content2.jpg'
                 width={500}
                 height={500}
                 alt='SEO'
@@ -73,13 +73,7 @@ const index = () => {
         <div className='maxwellClass my-5'>
           <div className='w-full md:w-[80%] lg:w-[70%] mx-auto'>
             <h2 className='headingClass text-center'>Why Choose Us?</h2>
-            <p className='textClass'>Max Writings® is a content writing agency that provides high-quality content writing services.
-              Long story short, we started back in 2021 and have written more than 7000+ articles,
-              including blogs, product pages, social media posts, and pretty much everything else.
-              We have covered every industry, such as software, fashion, industrial machinery, car accessories,
-              mobiles, protective wear clothing, photography items, capsule homes, rapid prototyping, casting,
-              PVD coating, and so on. Last but not least, we don’t ask you to trust our word because we always
-              provide 1st article for free as a test. Only hire us if you like our free work.
+            <p className='textClass'>Long story short, we started back in 2021 and have written more than 7000+ articles, including blogs, product pages, social media posts, and pretty much everything else. We have covered every industry, such as software, fashion, industrial machinery, car accessories, mobiles, protective wear clothing, photography items, capsule homes, rapid prototyping, casting, PVD coating, and so on. Last but not least, we don’t ask you to trust our word because we always provide 1st article for free as a test. Only hire us if you like our free work.
             </p>
             <div className='my-10 mx-auto text-center'>
               <button className='buttonClass'>Create It</button>

@@ -5,27 +5,30 @@ import { CheckCircle, XCircle } from 'lucide-react';
 const pricingPlans = [
     {
         title: 'Standard',
+        smallTitle: "Best for Starters",
         price: '$29 per 1000 words',
-        features: ['5 SEO Articles', 'Keyword Optimization', 'Basic Analytics'],
-        notIncluded: ['Social Media Marketing', 'Advanced Analytics'],
+        features: ['Grammarly Checked', 'Hemingway Checked', 'Custom Comparison tables', 'Basic AI test score List item', 'Search Intent and Audiance Targeting', 'Specialized Picture according to content'],
+        notIncluded: [],
     },
     {
         title: 'All-in-One',
+        smallTitle: "Best for Business – Highest Sale",
         price: '$39 per 1000 words',
-        features: ['15 SEO Articles', 'Keyword Research', 'Advanced Analytics'],
-        notIncluded: ['Social Media Marketing'],
+        features: [' Grammarly Checked', 'Hemingway Checked', ' Internal & External Links', 'Custom Comparison tables', 'Search Intent and Audiance Targeting', 'Specialized Picture according to content', 'SEO-optimized with Surfer SEO & Semrush', ' Passive Voice and Long Sentances checking', 'Copyleaks / Originality.AI / Quill bot For AI Checking'],
+        notIncluded: [],
     },
     {
         title: 'Quickest 12-Hour',
-        price: 'Best for Urgent Work',
-        features: ['30+ SEO Articles', 'Full SEO Optimization', 'Social Media Marketing', 'Advanced Analytics'],
+        smallTitle: "Best for Urgent Work",
+        price: '$79 per 1000 words',
+        features: ['Priority work within 12 hours', 'Grammarly Checked', 'Hemingway Checked', 'Internal & External Links', 'Custom Comparison tables', 'Search Intent and Audience Targeting', 'Specialized Picture according to content', 'SEO-optimized with Surfer SEO & Semrush', 'Passive Voice and Long Sentences checking', 'Copyleaks / Originality.AI / Quill bot For AI Checking'],
         notIncluded: [],
     },
 ];
 
 const HomePrices = () => {
     return (
-        <div className="maxwellClass h-full md:h-screen md:grid md:grid-cols-1 justify-center items-center ">
+        <div className="maxwellClass pt-5 pb-20 md:grid md:grid-cols-1 justify-center items-center ">
             <div className='block'>
                 <div className="text-center">
                     <h2 className="headingClass">Our Services</h2>

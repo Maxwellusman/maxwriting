@@ -6,42 +6,42 @@ const services = [
     title: 'SEO Blogs',
     description:
       'Written in a friendly tone, using the second person “You”. These are SEO-optimized to get more views for Google’s ranking – Informational content.',
-    image: '/images/companylogo1.jpg',
+    image: '/images/SEO.jpg',
   },
   {
     id: 2,
-    title: 'Content Writing',
+    title: 'Product Pages',
     description:
-      'High-quality content writing services for websites, blogs, and marketing materials. Well-researched and engaging content.',
-    image: '/images/companylogo2.png',
+      'Written in a professional tone with a search intent for sales. To the point and accurate content to turn readers into potential buyers.',
+    image: '/images/productpages.jpg',
   },
   {
     id: 3,
-    title: 'Social Media Marketing',
+    title: 'Home Page',
     description:
-      'We help businesses build a strong online presence and engage audiences through strategic social media marketing.',
-    image: '/images/companylogo3.jpg',
+      'Written in a friendly + Professional tone to make it feel like personnel but keeping it to the point. Including company history, benefits, product overview, etc.',
+    image: '/images/webhomepage.jpg',
   },
   {
     id: 4,
-    title: 'Web Development',
+    title: 'Academic Writing',
     description:
-      'From simple websites to complex web applications, our team provides customized solutions to meet your business needs.',
-    image: '/images/companylogo1.jpg',
+      'Whether it is weekly assignments, final year projects, or presentations – we can do all, no matter the field.',
+    image: '/images/academicwriting.jpg',
   },
   {
     id: 5,
-    title: 'Graphic Design',
+    title: 'Social Media Posts',
     description:
-      'Creative and eye-catching designs for branding, social media, and marketing materials to boost your business.',
-    image: '/images/companylogo2.png',
+      'Designing attractive daily posts for Facebook, Instagram, TikTok, Snapchat, Twitter, WeChat, etc.',
+    image: '/images/socialmediaposts.jpg',
   },
   {
     id: 6,
-    title: 'Google Ads',
+    title: 'Website Building',
     description:
-      'We create and optimize Google Ads campaigns to drive targeted traffic and maximize your return on investment.',
-    image: '/images/companylogo3.jpg',
+      'Build your website from scratch – leave all the hassle on us, from buying hosting to designing layout to writing page text.',
+    image: '/images/websitebuilding.jpg',
   },
 ];
 
@@ -64,9 +64,10 @@ const HomeServices = () => {
               width={500}
               height={500}
               alt={service.title}
-              className="outline-none focus:outline-none"
+              className="outline-none focus:outline-none h-[250px] w-[500px] object-cover rounded-lg mb-5"
               draggable={false} // Prevent dragging
               onContextMenu={(e) => e.preventDefault()} // Disables right-click
+              loading='lazy'
             />
             <div>
               <h3 className=" text-[18px] md:text-[24px] text-center text-primary-orange">{service.title}</h3>
