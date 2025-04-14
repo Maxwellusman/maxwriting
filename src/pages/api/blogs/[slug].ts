@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../../lib/mongodb';
 import BlogPost from '../../../models/BlogPost';
+import { put } from '@vercel/blob';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,12 +21,18 @@ export default async function handler(
       return res.status(400).json({ error: 'Slug parameter is required' });
     }
 
-    await connectToDatabase(); // Just connect, no destructuring
+    await connectToDatabase();
 
-    const post = await BlogPost.findOne({ slug }).lean(); // Use Mongoose model
+    const post = await BlogPost.findOne({ slug }).lean();
 
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // If imageUrl is from Blob storage and needs to be refreshed
+    if (post.imageUrl?.includes('blob.vercel-storage.com')) {
+      // You might want to add logic here to refresh the Blob URL if needed
+      // For example, generate a new signed URL if your storage requires it
     }
 
     return res.status(200).json(post);

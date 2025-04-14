@@ -16,6 +16,8 @@ interface BlogPost {
   readTime?: string;
   writer: string;
   linkedinUrl?: string;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export default function BlogPost() {
@@ -26,6 +28,7 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -34,6 +37,7 @@ export default function BlogPost() {
       try {
         setIsLoading(true);
         setError(null);
+        setImageError(false);
 
         const response = await fetch(`/api/blogs/${slug}`);
 
@@ -154,16 +158,16 @@ export default function BlogPost() {
   return (
     <>
       <Head>
-        <title>{post.title} | Your Blog Name</title>
-        <meta name="description" content={post.content.substring(0, 150) + '...'} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.content.substring(0, 150) + '...'} />
+        <title>{post.metaTitle || post.title} | MaxWritings</title>
+        <meta name="description" content={post.metaDescription || post.content.substring(0, 150) + '...'} />
+        <meta property="og:title" content={post.metaTitle || post.title} />
+        <meta property="og:description" content={post.metaDescription || post.content.substring(0, 150) + '...'} />
         <meta property="og:image" content={post.imageUrl || '/default-image.jpg'} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.content.substring(0, 150) + '...'} />
+        <meta name="twitter:title" content={post.metaTitle || post.title} />
+        <meta name="twitter:description" content={post.metaDescription || post.content.substring(0, 150) + '...'} />
         <meta name="twitter:image" content={post.imageUrl || '/default-image.jpg'} />
         <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
       </Head>
@@ -180,13 +184,6 @@ export default function BlogPost() {
                 <FiArrowLeft className="mr-2" /> Back to Blog
               </button>
               <div className="flex items-center space-x-4">
-                {/* <button 
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
-                  aria-label="Bookmark"
-                >
-                  {isBookmarked ? <FaBookmark className="text-indigo-600" /> : <FaRegBookmark />}
-                </button> */}
                 <div className="relative">
                   <button 
                     onClick={() => setIsShareOpen(!isShareOpen)}
@@ -232,7 +229,7 @@ export default function BlogPost() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
             {/* Featured Image */}
-            {post.imageUrl && (
+            {post.imageUrl && !imageError ? (
               <div className="relative h-96 w-full">
                 <Image
                   src={post.imageUrl}
@@ -241,8 +238,14 @@ export default function BlogPost() {
                   className="object-cover"
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1000px"
+                  unoptimized={post.imageUrl.includes('blob.vercel-storage.com')}
+                  onError={() => setImageError(true)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              </div>
+            ) : (
+              <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400">Featured Image</span>
               </div>
             )}
 
@@ -346,7 +349,7 @@ export default function BlogPost() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">About '{post.writer}'</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">About {post.writer}</h3>
                   <p className="text-gray-600">
                     {post.linkedinUrl && (
                       <a 

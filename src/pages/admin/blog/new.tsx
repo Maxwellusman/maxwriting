@@ -1,29 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
-import { GetServerSideProps } from 'next';
 import { useEditor, EditorContent } from '@tiptap/react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import ListItem from '@tiptap/extension-list-item';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import Blockquote from '@tiptap/extension-blockquote';
-import Code from '@tiptap/extension-code';
-import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '@/components/AdminLayout';
 
 export default function NewBlogPost() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [excerpt, setExcerpt] = useState('');
@@ -31,9 +24,9 @@ export default function NewBlogPost() {
   const [metaDescription, setMetaDescription] = useState('');
   const [keywords, setKeywords] = useState('');
   const [focusKeyword, setFocusKeyword] = useState('');
-  const [seoScore, setSeoScore] = useState(0);
   const [writer, setWriter] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [seoScore, setSeoScore] = useState(0);
   const [contentStats, setContentStats] = useState({
     titleLength: 0,
     excerptLength: 0,
@@ -50,7 +43,6 @@ export default function NewBlogPost() {
   const editorImageInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Tiptap Editor with all extensions
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -75,9 +67,7 @@ export default function NewBlogPost() {
       }),
       TextStyle,
       Color,
-      Highlight.configure({
-        multicolor: true,
-      }),
+      Highlight.configure({ multicolor: true }),
       Underline,
       Link.configure({
         openOnClick: false,
@@ -85,22 +75,6 @@ export default function NewBlogPost() {
           class: 'text-blue-500 hover:text-blue-700 underline',
         },
       }),
-      BulletList.configure({
-        HTMLAttributes: {
-          class: 'list-disc pl-5',
-        },
-      }),
-      OrderedList.configure({
-        HTMLAttributes: {
-          class: 'list-decimal pl-5',
-        },
-      }),
-      Blockquote.configure({
-        HTMLAttributes: {
-          class: 'border-l-4 border-gray-300 pl-4 italic',
-        },
-      }),
-      Code,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -110,39 +84,8 @@ export default function NewBlogPost() {
       attributes: {
         class: 'prose max-w-none focus:outline-none',
       },
-      handleDOMEvents: {
-        drop: (view, event) => {
-          event.preventDefault();
-          const files = event.dataTransfer?.files;
-          if (files && files.length) {
-            const file = files[0];
-            if (file.type.includes('image/')) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const pos = view.posAtCoords({
-                  left: event.clientX,
-                  top: event.clientY,
-                });
-                if (pos && reader.result) {
-                  view.dispatch(
-                    view.state.tr
-                      .setMeta('uploadImage', true)
-                      .insert(pos.pos, view.state.schema.nodes.image.create({
-                        src: reader.result as string
-                      }))
-                  );
-                }
-              };
-              reader.readAsDataURL(file);
-            }
-          }
-          return true;
-        },
-      },
     },
-    onUpdate: () => {
-      updateContentStats();
-    },
+    onUpdate: () => updateContentStats(),
   });
 
   const updateContentStats = () => {
@@ -150,10 +93,6 @@ export default function NewBlogPost() {
     const textContent = editor?.getText() || '';
     const contentSizeBytes = new Blob([content]).size;
     const contentSizeKB = Math.round(contentSizeBytes / 1024);
-
-    if (contentSizeKB > 2048) {
-      toast.error('Content size exceeds 2MB limit! Please reduce content size.');
-    }
 
     setContentStats({
       titleLength: title.length,
@@ -174,70 +113,57 @@ export default function NewBlogPost() {
 
   useEffect(() => {
     let score = 0;
-    
     if (title.length >= 50 && title.length <= 60) score += 20;
     if (focusKeyword && title.toLowerCase().includes(focusKeyword.toLowerCase())) score += 15;
-    
-    const wordCount = contentStats.contentWords;
-    if (wordCount >= 300) score += 15;
-    
-    const desc = metaDescription || excerpt;
-    if (desc.length >= 120 && desc.length <= 160) score += 15;
-    
+    if (contentStats.contentWords >= 300) score += 15;
+    if ((metaDescription || excerpt).length >= 120 && (metaDescription || excerpt).length <= 160) score += 15;
     if (imagePreview) score += 10;
-    
     if (contentStats.h2Count > 0) score += 10;
-    
     if (contentStats.linkCount > 0) score += 5;
-    
-    if (focusKeyword && editor?.getText().toLowerCase().includes(focusKeyword.toLowerCase())) {
-      score += 10;
-    }
-    
+    if (focusKeyword && editor?.getText().toLowerCase().includes(focusKeyword.toLowerCase())) score += 10;
     if (writer) score += 5;
-    
     setSeoScore(Math.min(100, score));
-  }, [title, excerpt, metaDescription, focusKeyword, imagePreview, writer, contentStats]);
+  }, [title, excerpt, metaDescription, focusKeyword, imagePreview, contentStats, writer]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
     setSlug(newTitle.toLowerCase().replace(/\s+/g, '-'));
-    
-    if (!metaTitle) {
-      setMetaTitle(newTitle.length > 60 ? newTitle.substring(0, 57) + '...' : newTitle);
+    if (!metaTitle) setMetaTitle(newTitle.length > 60 ? newTitle.substring(0, 57) + '...' : newTitle);
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size exceeds 2MB limit!');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      const { imageUrl } = await response.json();
+      setImagePreview(imageUrl);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Upload failed');
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Image size exceeds 2MB limit!');
-        return;
-      }
-      setImage(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const addDeviceImageToEditor = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Image size exceeds 2MB limit!');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        editor?.chain().focus().setImage({ src: reader.result as string }).run();
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const setLink = () => {
@@ -251,6 +177,22 @@ export default function NewBlogPost() {
     }
 
     editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  };
+
+  const addDeviceImageToEditor = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size exceeds 2MB limit!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      editor?.chain().focus().setImage({ src: reader.result as string }).run();
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -267,34 +209,15 @@ export default function NewBlogPost() {
     }
 
     setIsUploading(true);
-
     try {
-      let imageUrl = '';
-
-      if (image) {
-        const formData = new FormData();
-        formData.append('file', image);
-
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) throw new Error('Image upload failed');
-        const uploadData = await uploadResponse.json();
-        imageUrl = uploadData.imageUrl;
-      }
-
-      let editorContent = editor?.getHTML() || '';
-      
       const response = await fetch('/api/blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
           slug,
-          content: editorContent,
-          imageUrl,
+          content: editor?.getHTML() || '',
+          imageUrl: imagePreview || undefined,
           excerpt,
           metaTitle: metaTitle || undefined,
           metaDescription: metaDescription || undefined,
@@ -305,15 +228,14 @@ export default function NewBlogPost() {
         }),
       });
 
-      if (response.ok) {
-        toast.success('Blog post published successfully!');
-        setTimeout(() => router.push('/admin/blog'), 2000);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to create post');
       }
+
+      toast.success('Blog post published successfully!');
+      setTimeout(() => router.push('/admin/blog'), 2000);
     } catch (error) {
-      console.error('Error:', error);
       toast.error(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsUploading(false);
@@ -322,491 +244,447 @@ export default function NewBlogPost() {
 
   const getSeoRecommendations = () => {
     const recommendations = [];
-    
-    if (title.length < 50 || title.length > 60) {
-      recommendations.push('Title should be 50-60 characters');
+    if (title.length < 50 || title.length > 60) recommendations.push('Title should be 50-60 characters');
+    if (!focusKeyword) recommendations.push('Add a focus keyword for better SEO');
+    else {
+      if (!title.toLowerCase().includes(focusKeyword.toLowerCase())) recommendations.push('Include focus keyword in title');
+      if (!slug.includes(focusKeyword.toLowerCase())) recommendations.push('Include focus keyword in slug');
     }
-    
-    if (!focusKeyword) {
-      recommendations.push('Add a focus keyword for better SEO');
-    } else {
-      if (!title.toLowerCase().includes(focusKeyword.toLowerCase())) {
-        recommendations.push('Include focus keyword in title');
-      }
-      if (!slug.includes(focusKeyword.toLowerCase())) {
-        recommendations.push('Include focus keyword in slug');
-      }
-    }
-    
-    if (contentStats.contentWords < 300) {
-      recommendations.push('Content should be at least 300 words');
-    }
-    
-    if (contentStats.h2Count === 0) {
-      recommendations.push('Add at least one H2 heading');
-    }
-    
-    if (contentStats.imageCount === 0) {
-      recommendations.push('Add at least one image');
-    }
-    
-    if (contentStats.linkCount === 0) {
-      recommendations.push('Add internal links to other posts');
-    }
-    
-    if (!imagePreview) {
-      recommendations.push('Add a featured image');
-    }
-    
+    if (contentStats.contentWords < 300) recommendations.push('Content should be at least 300 words');
+    if (contentStats.h2Count === 0) recommendations.push('Add at least one H2 heading');
+    if (contentStats.imageCount === 0) recommendations.push('Add at least one image');
+    if (contentStats.linkCount === 0) recommendations.push('Add internal links to other posts');
+    if (!imagePreview) recommendations.push('Add a featured image');
     return recommendations;
   };
 
   return (
     <AdminLayout>
-    <div className="min-h-screen bg-gray-100 py-8">
-      <ToastContainer position="top-right" autoClose={5000} />
-      
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">Create New Blog Post</h1>
+      <div className="min-h-screen bg-gray-100 py-8">
+        <ToastContainer position="top-right" autoClose={5000} />
+        
+        <div className="max-w-6xl mx-auto px-4">
+          <h1 className="text-3xl font-bold text-center mb-8">Create New Blog Post</h1>
 
-        {/* Real-time Content Stats */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
-          <div className="text-center border-r pr-4">
-            <div className="font-semibold">Title</div>
-            <div className={`text-lg ${contentStats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
-              {contentStats.titleLength}/60
-            </div>
-          </div>
-          <div className="text-center border-r pr-4">
-            <div className="font-semibold">Meta Desc</div>
-            <div className={`text-lg ${contentStats.metaDescLength > 160 ? 'text-red-500' : 'text-green-500'}`}>
-              {contentStats.metaDescLength}/160
-            </div>
-          </div>
-          <div className="text-center border-r pr-4">
-            <div className="font-semibold">Words</div>
-            <div className="text-lg">
-              {contentStats.contentWords}
-              <span className="block text-xs">{contentStats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
-            </div>
-          </div>
-          <div className="text-center border-r pr-4">
-            <div className="font-semibold">Images</div>
-            <div className="text-lg">
-              {contentStats.imageCount}
-              <span className="block text-xs">{contentStats.imageCount === 0 ? 'Add images' : 'Good'}</span>
-            </div>
-          </div>
-          <div className="text-center border-r pr-4">
-            <div className="font-semibold">Headings</div>
-            <div className="text-lg">
-              H2: {contentStats.h2Count}, H3: {contentStats.h3Count}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="font-semibold">Size</div>
-            <div className={`text-lg ${contentStats.contentSizeKB > 2048 ? 'text-red-500' : 'text-green-500'}`}>
-              {(contentStats.contentSizeKB / 1024).toFixed(2)}MB
-            </div>
-          </div>
-        </div>
-
-        {/* SEO Score and Recommendations */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
-            <div className="w-full bg-gray-200 rounded-full h-4 max-w-md">
-              <div 
-                className={`h-4 rounded-full ${
-                  seoScore >= 80 ? 'bg-green-500' :
-                  seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                }`}
-                style={{ width: `${seoScore}%` }}
-              ></div>
-            </div>
-          </div>
-          
-          {seoScore < 80 && (
-            <div className="mt-4">
-              <h3 className="font-semibold mb-2">Recommendations:</h3>
-              <ul className="list-disc pl-5 text-sm text-gray-700">
-                {getSeoRecommendations().map((rec, index) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
-              {/* Title */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={handleTitleChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  maxLength={70}
-                />
-                {focusKeyword && !title.toLowerCase().includes(focusKeyword.toLowerCase()) && (
-                  <p className="text-xs text-red-500 mt-1">Consider including your focus keyword in the title</p>
-                )}
+          {/* Content Stats */}
+          <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Title</div>
+              <div className={`text-lg ${contentStats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
+                {contentStats.titleLength}/60
               </div>
-
-              {/* Slug */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Slug <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Meta Desc</div>
+              <div className={`text-lg ${contentStats.metaDescLength > 160 ? 'text-red-500' : 'text-green-500'}`}>
+                {contentStats.metaDescLength}/160
               </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Words</div>
+              <div className="text-lg">
+                {contentStats.contentWords}
+                <span className="block text-xs">{contentStats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Images</div>
+              <div className="text-lg">
+                {contentStats.imageCount}
+                <span className="block text-xs">{contentStats.imageCount === 0 ? 'Add images' : 'Good'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Headings</div>
+              <div className="text-lg">
+                H2: {contentStats.h2Count}, H3: {contentStats.h3Count}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold">Size</div>
+              <div className={`text-lg ${contentStats.contentSizeKB > 2048 ? 'text-red-500' : 'text-green-500'}`}>
+                {(contentStats.contentSizeKB / 1024).toFixed(2)}MB
+              </div>
+            </div>
+          </div>
 
-              {/* Writer and LinkedIn */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
+          {/* SEO Score */}
+          <div className="mb-6 bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
+              <div className="w-full bg-gray-200 rounded-full h-4 max-w-md">
+                <div 
+                  className={`h-4 rounded-full ${
+                    seoScore >= 80 ? 'bg-green-500' :
+                    seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${seoScore}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            {seoScore < 80 && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-2">Recommendations:</h3>
+                <ul className="list-disc pl-5 text-sm text-gray-700">
+                  {getSeoRecommendations().map((rec, index) => (
+                    <li key={index}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {/* Title */}
+                <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Writer <span className="text-red-500">*</span>
+                    Title <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    value={writer}
-                    onChange={(e) => setWriter(e.target.value)}
+                    value={title}
+                    onChange={handleTitleChange}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                    maxLength={70}
+                  />
+                  {focusKeyword && !title.toLowerCase().includes(focusKeyword.toLowerCase()) && (
+                    <p className="text-xs text-red-500 mt-1">Consider including your focus keyword in the title</p>
+                  )}
+                </div>
+
+                {/* Slug */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Slug <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    LinkedIn Profile URL
-                  </label>
-                  <input
-                    type="url"
-                    value={linkedinUrl}
-                    onChange={(e) => setLinkedinUrl(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-              </div>
 
-              {/* Editor Content */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Content <span className="text-red-500">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {/* Text formatting */}
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Bold
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Italic
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Underline
-                  </button>
-                  
-                  {/* Headings */}
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    H1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    H2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 3 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    H3
-                  </button>
-                  
-                  {/* Lists */}
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Bullet List
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Numbered List
-                  </button>
-                  
-                  {/* Block elements */}
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Quote
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleCode().run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Code
-                  </button>
-                  
-                  {/* Links */}
-                  <button
-                    type="button"
-                    onClick={setLink}
-                    className={`px-3 py-1 rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Link
-                  </button>
-                  
-                  {/* Text alignment */}
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().setTextAlign('left').run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'left' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Left
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().setTextAlign('center').run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'center' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Center
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().setTextAlign('right').run()}
-                    className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'right' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    Right
-                  </button>
-                  
-                  {/* Colors */}
-                  <div className="relative inline-block">
-                    <select
-                      onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
-                      className="px-3 py-1 rounded bg-gray-200 appearance-none"
-                      value={editor?.getAttributes('textStyle').color || ''}
-                    >
-                      <option value="">Text Color</option>
-                      <option value="#000000">Black</option>
-                      <option value="#ffffff" className="bg-black">White</option>
-                      <option value="#ff0000" className="bg-red-500">Red</option>
-                      <option value="#00ff00" className="bg-green-500">Green</option>
-                      <option value="#0000ff" className="bg-blue-500">Blue</option>
-                      <option value="#ffff00" className="bg-yellow-500">Yellow</option>
-                      <option value="#ff00ff" className="bg-purple-500">Purple</option>
-                    </select>
-                  </div>
-                  
-                  <div className="relative inline-block">
-                    <select
-                      onChange={(e) => editor?.chain().focus().setHighlight({ color: e.target.value }).run()}
-                      className="px-3 py-1 rounded bg-gray-200 appearance-none"
-                      value={editor?.getAttributes('highlight').color || ''}
-                    >
-                      <option value="">Highlight</option>
-                      <option value="#ffc078" className="bg-[#ffc078]">Orange</option>
-                      <option value="#8ce99a" className="bg-[#8ce99a]">Green</option>
-                      <option value="#74c0fc" className="bg-[#74c0fc]">Blue</option>
-                      <option value="#b197fc" className="bg-[#b197fc]">Purple</option>
-                      <option value="#ffa8a8" className="bg-[#ffa8a8]">Red</option>
-                      <option value="#ffe066" className="bg-[#ffe066]">Yellow</option>
-                    </select>
-                  </div>
-                  
-                  {/* Image */}
-                  <button
-                    type="button"
-                    onClick={() => editorImageInputRef.current?.click()}
-                    className="px-3 py-1 rounded bg-gray-200"
-                  >
-                    Insert Image
-                  </button>
-                  <input
-                    type="file"
-                    ref={editorImageInputRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={addDeviceImageToEditor}
-                  />
-                </div>
-                <div className="border p-3 rounded min-h-[200px] prose max-w-none">
-                  <EditorContent editor={editor} />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {/* Featured Image Upload */}
-              <div className="mb-4 p-4 border rounded-lg">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Featured Image</label>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded mb-2 transition w-full"
-                >
-                  {image ? 'Change Image' : 'Select Image'}
-                </button>
-                {imagePreview && (
-                  <div className="mt-2">
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="w-full h-auto object-contain rounded border"
+                {/* Writer and LinkedIn */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Writer <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={writer}
+                      onChange={(e) => setWriter(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      LinkedIn Profile URL
+                    </label>
+                    <input
+                      type="url"
+                      value={linkedinUrl}
+                      onChange={(e) => setLinkedinUrl(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                  </div>
+                </div>
+
+                {/* Editor Content */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Content <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        setImage(null);
-                        setImagePreview(null);
-                      }}
-                      className="text-red-500 text-sm mt-1 hover:text-red-700"
+                      onClick={() => editor?.chain().focus().toggleBold().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                     >
-                      Remove Image
+                      Bold
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleItalic().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Italic
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Underline
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      H1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      H2
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 3 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      H3
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Bullet List
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Numbered List
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Quote
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().toggleCode().run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Code
+                    </button>
+                    <button
+                      type="button"
+                      onClick={setLink}
+                      className={`px-3 py-1 rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'left' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Left
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'center' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Center
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'right' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    >
+                      Right
+                    </button>
+                    <div className="relative inline-block">
+                      <select
+                        onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
+                        className="px-3 py-1 rounded bg-gray-200 appearance-none"
+                        value={editor?.getAttributes('textStyle').color || ''}
+                      >
+                        <option value="">Text Color</option>
+                        <option value="#000000">Black</option>
+                        <option value="#ffffff" className="bg-black">White</option>
+                        <option value="#ff0000" className="bg-red-500">Red</option>
+                        <option value="#00ff00" className="bg-green-500">Green</option>
+                        <option value="#0000ff" className="bg-blue-500">Blue</option>
+                        <option value="#ffff00" className="bg-yellow-500">Yellow</option>
+                        <option value="#ff00ff" className="bg-purple-500">Purple</option>
+                      </select>
+                    </div>
+                    <div className="relative inline-block">
+                      <select
+                        onChange={(e) => editor?.chain().focus().setHighlight({ color: e.target.value }).run()}
+                        className="px-3 py-1 rounded bg-gray-200 appearance-none"
+                        value={editor?.getAttributes('highlight').color || ''}
+                      >
+                        <option value="">Highlight</option>
+                        <option value="#ffc078" className="bg-[#ffc078]">Orange</option>
+                        <option value="#8ce99a" className="bg-[#8ce99a]">Green</option>
+                        <option value="#74c0fc" className="bg-[#74c0fc]">Blue</option>
+                        <option value="#b197fc" className="bg-[#b197fc]">Purple</option>
+                        <option value="#ffa8a8" className="bg-[#ffa8a8]">Red</option>
+                        <option value="#ffe066" className="bg-[#ffe066]">Yellow</option>
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => editorImageInputRef.current?.click()}
+                      className="px-3 py-1 rounded bg-gray-200"
+                    >
+                      Insert Image
+                    </button>
+                    <input
+                      type="file"
+                      ref={editorImageInputRef}
+                      accept="image/*"
+                      className="hidden"
+                      onChange={addDeviceImageToEditor}
+                    />
                   </div>
-                )}
-                {!imagePreview && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Recommended size: 1200x630px (for social sharing)
-                  </p>
-                )}
-              </div>
-
-              {/* SEO Fields */}
-              <div className="mb-4 p-4 border rounded-lg bg-blue-50">
-                <h3 className="font-bold text-lg mb-3 text-blue-800">SEO Settings</h3>
-                
-                <div className="mb-3">
-                  <label className="block text-gray-700 text-sm font-bold mb-1">Focus Keyword</label>
-                  <input
-                    type="text"
-                    value={focusKeyword}
-                    onChange={(e) => setFocusKeyword(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="main keyword for this post"
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Meta Title
-                  </label>
-                  <input
-                    type="text"
-                    value={metaTitle}
-                    onChange={(e) => setMetaTitle(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    maxLength={70}
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Meta Description
-                  </label>
-                  <textarea
-                    value={metaDescription}
-                    onChange={(e) => setMetaDescription(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    rows={3}
-                    maxLength={170}
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Excerpt
-                  </label>
-                  <textarea
-                    value={excerpt}
-                    onChange={(e) => setExcerpt(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    rows={3}
-                    maxLength={170}
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-gray-700 text-sm font-bold mb-1">Keywords</label>
-                  <input
-                    type="text"
-                    value={keywords}
-                    onChange={(e) => setKeywords(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="comma, separated, keywords"
-                  />
+                  <div className="border p-3 rounded min-h-[200px] prose max-w-none">
+                    <EditorContent editor={editor} />
+                  </div>
                 </div>
               </div>
 
-              {/* Publish Button */}
-              <button
-                type="submit"
-                disabled={isUploading || contentStats.contentSizeKB > 2048}
-                className={`w-full px-4 py-3 rounded-lg text-white font-bold ${
-                  isUploading ? 'bg-blue-400' : 
-                  contentStats.contentSizeKB > 2048 ? 'bg-red-400' : 'bg-blue-600 hover:bg-blue-700'
-                } transition`}
-              >
-                {isUploading ? 'Publishing...' : 
-                 contentStats.contentSizeKB > 2048 ? 'Content too large (2MB max)' : 'Publish Post'}
-              </button>
+              <div className="space-y-4">
+                {/* Featured Image Upload */}
+                <div className="mb-4 p-4 border rounded-lg">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Featured Image</label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded mb-2 transition w-full"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? 'Uploading...' : imagePreview ? 'Change Image' : 'Select Image'}
+                  </button>
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-auto object-contain rounded border"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="text-red-500 text-sm mt-1 hover:text-red-700"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  )}
+                  {!imagePreview && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Recommended size: 1200x630px (for social sharing)
+                    </p>
+                  )}
+                </div>
+
+                {/* SEO Fields */}
+                <div className="mb-4 p-4 border rounded-lg bg-blue-50">
+                  <h3 className="font-bold text-lg mb-3 text-blue-800">SEO Settings</h3>
+                  
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">Focus Keyword</label>
+                    <input
+                      type="text"
+                      value={focusKeyword}
+                      onChange={(e) => setFocusKeyword(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="main keyword for this post"
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">
+                      Meta Title
+                    </label>
+                    <input
+                      type="text"
+                      value={metaTitle}
+                      onChange={(e) => setMetaTitle(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      maxLength={70}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">
+                      Meta Description
+                    </label>
+                    <textarea
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      rows={3}
+                      maxLength={170}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">
+                      Excerpt
+                    </label>
+                    <textarea
+                      value={excerpt}
+                      onChange={(e) => setExcerpt(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      rows={3}
+                      maxLength={170}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">Keywords</label>
+                    <input
+                      type="text"
+                      value={keywords}
+                      onChange={(e) => setKeywords(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="comma, separated, keywords"
+                    />
+                  </div>
+                </div>
+
+                {/* Publish Button */}
+                <button
+                  type="submit"
+                  disabled={isUploading || contentStats.contentSizeKB > 2048}
+                  className={`w-full px-4 py-3 rounded-lg text-white font-bold ${
+                    isUploading ? 'bg-blue-400' : 
+                    contentStats.contentSizeKB > 2048 ? 'bg-red-400' : 'bg-blue-600 hover:bg-blue-700'
+                  } transition`}
+                >
+                  {isUploading ? 'Publishing...' : 
+                  contentStats.contentSizeKB > 2048 ? 'Content too large (2MB max)' : 'Publish Post'}
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
     </AdminLayout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export async function getServerSideProps(context: any) {
   const session = await getSession(context);
-
   if (!session) {
     return {
       redirect: {
@@ -815,8 +693,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-
-  return {
-    props: {},
-  };
-};
+  return { props: {} };
+}

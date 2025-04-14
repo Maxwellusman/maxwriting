@@ -1,5 +1,3 @@
-// pages/blogs.tsx
-
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,6 +14,7 @@ export interface BlogPostDocument {
   imageUrl?: string;
   metaTitle?: string;
   metaDescription?: string;
+  writer?: string;
 }
 
 export default function Blogs() {
@@ -23,6 +22,7 @@ export default function Blogs() {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const router = useRouter();
   const pageSize = 6;
   const siteUrl = 'https://maxwritings.com';
@@ -31,24 +31,18 @@ export default function Blogs() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/blog?page=${currentPage}&pageSize=${pageSize}`);
+        const res = await fetch(`/api/blog?page=${currentPage}&limit=${pageSize}`);
         const data = await res.json();
 
-        if (Array.isArray(data)) {
-          const sorted = data.sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          setPosts(sorted);
-          setTotalPages(1);
-        } else if (data.success) {
-          const sorted: BlogPostDocument[] = data.data.sort(
-            (a: BlogPostDocument, b: BlogPostDocument) =>
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch posts');
+
+        if (data.success) {
+          const sorted = data.data.sort(
+            (a: BlogPostDocument, b: BlogPostDocument) => 
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
           setPosts(sorted);
           setTotalPages(data.pagination.totalPages);
-        } else {
-          console.error('Unexpected API response:', data);
         }
       } catch (err) {
         console.error('Error fetching blog posts:', err);
@@ -63,6 +57,10 @@ export default function Blogs() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleImageError = (postId: string) => {
+    setImageErrors(prev => ({ ...prev, [postId]: true }));
   };
 
   const seoTitle = `Read Expert Blog Posts on Writing | MaxWritings`;
@@ -113,14 +111,14 @@ export default function Blogs() {
           ) : posts.length > 0 ? (
             <>
               <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {posts.map((post, index) => (
+                {posts.map((post) => (
                   <article
                     key={post._id}
                     className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
                   >
                     <Link href={`/blogs/${post.slug}`} passHref>
                       <div className="cursor-pointer h-full flex flex-col">
-                        {post.imageUrl && (
+                        {post.imageUrl && !imageErrors[post._id] ? (
                           <div className="relative h-48 w-full">
                             <Image
                               src={post.imageUrl}
@@ -128,8 +126,14 @@ export default function Blogs() {
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              priority={currentPage === 1 && index < 3}
+                              priority={currentPage === 1 && posts.indexOf(post) < 3}
+                              unoptimized={post.imageUrl.includes('blob.vercel-storage.com')}
+                              onError={() => handleImageError(post._id)}
                             />
+                          </div>
+                        ) : (
+                          <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
+                            <span className="text-gray-400">No Image</span>
                           </div>
                         )}
                         <div className="p-6 flex-1 flex flex-col">
@@ -150,6 +154,11 @@ export default function Blogs() {
                                 day: 'numeric',
                               })}
                             </time>
+                            {post.writer && (
+                              <span className="text-sm text-gray-500">
+                                By {post.writer}
+                              </span>
+                            )}
                             <span className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
                               Read more →
                             </span>
