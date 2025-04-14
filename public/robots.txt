@@ -1,0 +1,18 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api
+
+# Googlebot-Image
+User-agent: Googlebot-Image
+Allow: /images
+
+# Host
+Host: https://maxwritings.com
+
+# Sitemaps
+Sitemap: https://maxwritings.com/sitemap.xml
+Sitemap: https://maxwritings.com/server-sitemap.xml
+Sitemap: https://maxwritings.com/sitemap-posts.xml

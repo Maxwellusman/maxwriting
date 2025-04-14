@@ -2,10 +2,57 @@ import React from "react";
 import ContactForm from "../components/ContactForm";
 import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
+import { NextSeo } from "next-seo";
 
 const ContactUs = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 lg:mt-32 pb-10">
+      <NextSeo
+        title="Contact Us | MaxWritings - Let's Work Together"
+        description="Have questions or want to discuss a content writing project? Contact MaxWritings today via email, phone, or our online contact form."
+        canonical="https://maxwritings.com/contact-us"
+        openGraph={{
+          url: "https://maxwritings.com/contact-us",
+          title: "Contact MaxWritings - Reach Out Today",
+          description:
+            "Have questions or want to discuss a content writing project? Contact MaxWritings today via email, phone, or our online contact form.",
+          images: [
+            {
+              url: "https://maxwritings.com/og-contact.jpg", // Replace with actual image
+              width: 1200,
+              height: 630,
+              alt: "Contact MaxWritings",
+            },
+          ],
+          siteName: "MaxWritings",
+        }}
+      />
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            name: "Contact MaxWritings",
+            description:
+              "Get in touch with MaxWritings for SEO content writing, blog publishing, and business inquiries.",
+            url: "https://maxwritings.com/contact-us",
+            mainEntity: {
+              "@type": "Organization",
+              name: "MaxWritings",
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: "+92-313-695-2876",
+                contactType: "Customer Service",
+                email: "maxwritings@gmail.com",
+              },
+            },
+          }),
+        }}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Left Section - Contact Info */}
         <div>
@@ -13,7 +60,7 @@ const ContactUs = () => {
             Contact Us
           </h1>
           <p className="text-center lg:text-left text-gray-600 mt-2">
-            If you have any questions or need help, feel free to reach out.
+            Have questions or want to start your content journey? Reach out to MaxWritings — we're here to help.
           </p>
 
           <div className="mt-6 space-y-4">

@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "next-sitemap && node ./scripts/generate-seo-files.js",
+    "preview": "next build && next start"
   },
   "dependencies": {
     "@mantine/core": "^7.17.3",
@@ -23,6 +25,7 @@
     "@types/next-auth": "^3.13.0",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "formidable": "^3.5.2",
     "install": "^0.13.0",
@@ -31,6 +34,7 @@
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "next-seo": "^6.6.0",
+    "next-sitemap": "^4.2.3",
     "nodemailer": "^6.10.0",
     "npm": "^11.2.0",
     "react": "^19.0.0",
@@ -43,6 +47,7 @@
     "swiper": "^11.2.5",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "xmlbuilder2": "^3.1.1",
     "yoastseo": "^3.0.0"
   },
   "devDependencies": {

@@ -31,7 +31,7 @@ const Navbar = () => {
               Blogs
             </NavLink>
             {/* Services Dropdown */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-1 text-gray-800 hover:text-primary-orange transition"
@@ -60,7 +60,7 @@ const Navbar = () => {
                   </NavDropdownItem>
                 </div>
               )}
-            </div>
+            </div> */}
             <NavLink href="/about-us" pathname={pathname}>
               About Us
             </NavLink>
@@ -92,8 +92,15 @@ const Navbar = () => {
               Blog
             </NavLink>
 
+            <NavLink href="/about-us" pathname={pathname}>
+              About Us
+            </NavLink>
+            <NavLink href="/contact-us" pathname={pathname}>
+              Contact Us
+            </NavLink>
+
             {/* Services Dropdown in Mobile */}
-            <div className="border-t pt-2">
+            {/* <div className="border-t pt-2">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex justify-between w-full text-gray-800 hover:text-primary-orange transition"
@@ -113,7 +120,7 @@ const Navbar = () => {
                   </NavDropdownItem>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       )}

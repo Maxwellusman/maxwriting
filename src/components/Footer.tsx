@@ -17,7 +17,7 @@ const Footer = () => {
                             onContextMenu={(e) => e.preventDefault()} // Disables right-click
                         />
                     </div>
-                    <div className="col-span-4 md:col-span-1 lg:col-span-1">
+                    {/* <div className="col-span-4 md:col-span-1 lg:col-span-1">
                         <h4 className="mb-4 text-[20px]  font-prosto">Services</h4>
                         <ul>
                             <li className="mb-2 text-[14px]">
@@ -39,7 +39,7 @@ const Footer = () => {
                                 <Link href="services/website-building">Website Building</Link>
                             </li>
                         </ul>
-                    </div>
+                    </div> */}
                     <div className="col-span-4 md:col-span-2 lg:col-span-1">
                         <h4 className="mb-4 text-[20px]  font-prosto">Contact Us</h4>
                         <ul>

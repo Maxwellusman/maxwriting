@@ -1,3 +1,5 @@
+// pages/blogs.tsx
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -23,6 +25,7 @@ export default function Blogs() {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const pageSize = 6;
+  const siteUrl = 'https://maxwritings.com';
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -62,29 +65,37 @@ export default function Blogs() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const seoTitle = `Read Expert Blog Posts on Writing | MaxWritings`;
+  const seoDescription = `Explore professional blogs, expert writing tips, and industry updates. Stay informed with the latest from MaxWritings.`;
+  const canonicalUrl = `${siteUrl}${router.asPath}`;
+
   return (
     <>
       <Head>
-        <title>Blog Posts | Your Site Name</title>
-        <meta name="description" content="Browse our latest blog posts and articles" />
-        <meta name="keywords" content="blog, articles, posts, news" />
-        <meta property="og:title" content="Blog Posts | Your Site Name" />
-        <meta property="og:description" content="Browse our latest blog posts and articles" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="writing blog, content writing, blog articles, professional writing tips" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
-        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL}${router.asPath}`} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="MaxWritings" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <header className="text-center mb-12">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl lg:text-6xl">
-              Our Blog
+              MaxWritings Blog
             </h1>
             <p className="mt-4 max-w-xl mx-auto text-xl text-gray-600">
-              Latest articles, news, and updates
+              Expert writing guides, updates & tips from professionals
             </p>
-          </div>
+          </header>
 
           {loading ? (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -101,9 +112,9 @@ export default function Blogs() {
             </div>
           ) : posts.length > 0 ? (
             <>
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {posts.map((post, index) => (
-                  <div
+                  <article
                     key={post._id}
                     className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
                   >
@@ -113,7 +124,7 @@ export default function Blogs() {
                           <div className="relative h-48 w-full">
                             <Image
                               src={post.imageUrl}
-                              alt={post.title}
+                              alt={`Cover image for ${post.title}`}
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -146,17 +157,18 @@ export default function Blogs() {
                         </div>
                       </div>
                     </Link>
-                  </div>
+                  </article>
                 ))}
-              </div>
+              </main>
 
               {totalPages > 1 && (
-                <div className="mt-12 flex justify-center">
+                <nav className="mt-12 flex justify-center" aria-label="Pagination">
                   <div className="flex space-x-2">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
+                        aria-current={currentPage === page ? 'page' : undefined}
                         className={`px-4 py-2 rounded-md ${
                           currentPage === page
                             ? 'bg-blue-600 text-white'
@@ -167,7 +179,7 @@ export default function Blogs() {
                       </button>
                     ))}
                   </div>
-                </div>
+                </nav>
               )}
             </>
           ) : (

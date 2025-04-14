@@ -1,0 +1,8 @@
+# Max Writings Security Contact
+Contact: mailto:security@maxwritings.com
+Contact: https://maxwritings.com/contact
+Encryption: https://maxwritings.com/.well-known/pgp-key.txt
+Acknowledgments: https://maxwritings.com/security/hall-of-fame
+Policy: https://maxwritings.com/security-policy
+Preferred-Languages: en
+Expires: 2025-12-31T00:00:00.000Z
