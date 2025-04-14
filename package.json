@@ -6,9 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postbuild": "next-sitemap && node ./scripts/generate-seo-files.js",
-    "preview": "next build && next start"
+    "lint": "next lint"
   },
   "dependencies": {
     "@mantine/core": "^7.17.3",
