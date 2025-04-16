@@ -1,6 +1,6 @@
 import React from "react";
 import ContactForm from "../components/ContactForm";
-import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Phone, Mail, Facebook, Twitter, Instagram, Linkedin, } from "lucide-react";
 import Link from "next/link";
 import { NextSeo } from "next-seo";
 

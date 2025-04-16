@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build": "next build",
+  "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@mantine/core": "^7.17.3",
