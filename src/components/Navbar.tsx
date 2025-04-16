@@ -88,7 +88,7 @@ const Navbar = () => {
             <NavLink href="/" pathname={pathname}>
               Home
             </NavLink>
-            <NavLink href="/blog" pathname={pathname}>
+            <NavLink href="/blogs" pathname={pathname}>
               Blog
             </NavLink>
 
