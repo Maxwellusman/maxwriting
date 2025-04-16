@@ -20,8 +20,10 @@ const Banner: React.FC = () => {
         layout="fill"
         objectFit="cover"
         quality={80}
-        priority={false}
+        fill
+        priority // Add this to prioritize loading
         className="fixed top-0 left-0 w-full h-full -z-10"
+        sizes="100vw"
       />
 
       {/* Overlay */}

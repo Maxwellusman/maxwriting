@@ -75,6 +75,7 @@
 
 body {
   font-family: "Catamaran", sans-serif;
+  font-display: swap;
 }
 
 .maxwellClass {
