@@ -31,10 +31,10 @@ const HomePrices = () => {
         <div className="maxwellClass pt-5 pb-20 md:grid md:grid-cols-1 justify-center items-center ">
             <div className='block'>
                 <div className="text-center">
-                    <h2 className="headingClass">Our Services</h2>
-                    <div className="mb-10">
+                    <h2 className="headingClass lg:pb-5">Our Prices</h2>
+                    {/* <div className="mb-10">
                         <button className="buttonClass">Create It</button>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">

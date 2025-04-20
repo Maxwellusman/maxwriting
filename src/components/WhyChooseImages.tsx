@@ -8,11 +8,12 @@ const WhyChooseImages = () => {
     { src: '/images/whychoose3.png', alt: 'Feature 3' },
     { src: '/images/whychoose4.jpeg', alt: 'Feature 4' },
     { src: '/images/whychoose5.jpeg', alt: 'Feature 5' },
+    { src: '/images/whychoose6.png', alt: 'Feature 6' },
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div className="container mx-auto px-4 ">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
         {images.map((image, index) => (
           <div 
             key={index} 

@@ -51,7 +51,7 @@ const HomeServices = () => {
       <div className="text-center">
         <h2 className="headingClass">Our Services</h2>
         <div className="mb-10">
-          <button className="buttonClass">Create It</button>
+          {/* <button className="buttonClass">Create It</button> */}
         </div>
       </div>
 

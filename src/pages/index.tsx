@@ -21,22 +21,22 @@ const Home = () => {
         <meta name="title" content={pageTitle} />
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content={keywords} />
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href={canonicalUrl} />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content="/images/content1.jpg" />
-        
+
         {/* Twitter */}
         <meta property="twitter:url" content={canonicalUrl} />
         <meta property="twitter:title" content={pageTitle} />
         <meta property="twitter:description" content={pageDescription} />
-        
+
         {/* Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -54,10 +54,10 @@ const Home = () => {
 
       <main>
         <Banner />
-        <CompanyLogosSwiper />
-        
+        {/* <CompanyLogosSwiper /> */}
+
         {/* Section 1: Rank on Google */}
-        <section className='grid grid-cols-1 justify-center items-center' itemScope itemType="https://schema.org/Service">
+        <section className='grid grid-cols-1 justify-center items-center mt-5' itemScope itemType="https://schema.org/Service">
           <div className='maxwellClass my-5'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-center justify-center'>
               <div className='col-span-2 lg:col-span-1'>
@@ -91,7 +91,7 @@ const Home = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Section 2: Free Article */}
         <section className='grid grid-cols-1 justify-center items-center'>
           <div className='maxwellClass my-5'>
@@ -125,27 +125,38 @@ const Home = () => {
             </div>
           </div>
         </section>
-        
+
         <HomeServices />
-        
+
         {/* Section 3: Why Choose Us */}
         <section className='grid grid-cols-1 justify-center items-center'>
-          <div className='maxwellClass my-5'>
+          <div className='maxwellClass mt-5'>
             <div className='w-full md:w-[80%] lg:w-[70%] mx-auto'>
               <h2 className='headingClass text-center'>Why Choose Our SEO Content Writing Services?</h2>
+              <WhyChooseImages />
               <p className='textClass font-[500]'>
+                
                 Long story short, we started back in 2021 and have written more than 7000+ articles, including blogs, product pages, social media posts, and pretty much everything else. We have covered every industry, such as software, fashion, industrial machinery, car accessories, mobiles, protective wear clothing, photography items, capsule homes, rapid prototyping, casting, PVD coating, and so on. Last but not least, we don't ask you to trust our word because we always provide 1st article for free as a test. Only hire us if you like our free work.
               </p>
-              <WhyChooseImages />
-              <div className='my-10 mx-auto text-center '>
+
+              {/* <div className='my-10 mx-auto text-center '>
                 <a href="/contact" className='buttonClass' aria-label="Contact our SEO content writing team">
                   Start Ranking Today
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>
-        
+
+        <section>
+          <div className='maxwellClass mt-5'>
+            <div className='w-full md:w-[80%] lg:w-[70%] mx-auto'>
+              <h2 className='headingClass text-center'>Our Clients</h2>
+            </div>
+          </div>
+          <CompanyLogosSwiper />
+        </section>
+
         <HomePrices />
       </main>
     </>
