@@ -10,7 +10,7 @@ const companyLogos = [
     '/clientlogos/00e02Ss3KiOLKE7Ivb8SQ0P-1..v1632757092.png',
     '/clientlogos/1.png',
     '/clientlogos/460x0w.png',
-    '/clientlogos/1736145265866.jfif',
+    // '/clientlogos/1736145265866.jfif',
     '/clientlogos/download.png',
     '/clientlogos/glamnilogo.png',
     '/clientlogos/images_2.png',
