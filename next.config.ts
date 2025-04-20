@@ -4,19 +4,27 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  async redirects() {
+  async redirect() {
     return [
       {
-        // Redirect www to non-www
-        source: "/:path*",
-        has: [{ type: "host", key: "host", value: "www.maxwritings.com" }],
+        source: "/:path*", // Matches all routes
+        has: [
+          {
+            type: "host",
+            value: "www.maxwritings.com", // redirect from www to non-www
+          },
+        ],
         destination: "https://maxwritings.com/:path*",
         permanent: true,
       },
       {
-        // Redirect http to https
         source: "/:path*",
-        has: [{ type: "protocol", key: "protocol", value: "http" }],
+        has: [
+          {
+            type: "protocol",
+            value: "http", // redirect http to https
+          },
+        ],
         destination: "https://maxwritings.com/:path*",
         permanent: true,
       },
