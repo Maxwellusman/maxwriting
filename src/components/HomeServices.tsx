@@ -6,14 +6,14 @@ const services = [
     title: 'SEO Blogs',
     description:
       'Written in a friendly tone, using the second person “You”. These are SEO-optimized to get more views for Google’s ranking – Informational content.',
-    image: '/images/SEO.jpg',
+    image: '/images/SEO BLOGS.png',
   },
   {
     id: 2,
     title: 'Product Pages',
     description:
       'Written in a professional tone with a search intent for sales. To the point and accurate content to turn readers into potential buyers.',
-    image: '/images/productpages.jpg',
+    image: '/images/Product pages.png',
   },
   {
     id: 3,

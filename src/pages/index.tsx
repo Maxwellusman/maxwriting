@@ -78,7 +78,7 @@ const Home = () => {
               </div>
               <div className='col-span-2 lg:col-span-1 flex justify-center items-center'>
                 <Image
-                  src='/images/content1.jpg'
+                  src='/images/Rank on GOOGLE First page.png'
                   width={500}
                   height={500}
                   alt='Professional SEO content writing service to rank on Google'
@@ -95,10 +95,10 @@ const Home = () => {
         {/* Section 2: Free Article */}
         <section className='grid grid-cols-1 justify-center items-center'>
           <div className='maxwellClass my-5'>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-center justify-center'>
-              <div className='col-span-2 lg:col-span-1 flex justify-center items-center'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-center justify-between'>
+              <div className='col-span-2 lg:col-span-1 flex justify-center items-start'>
                 <Image
-                  src='/images/content2.jpg'
+                  src='/images/Free Blog Sample.png'
                   width={500}
                   height={500}
                   alt='Try our content writing services with a free article'
