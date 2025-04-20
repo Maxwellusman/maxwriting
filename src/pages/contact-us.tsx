@@ -59,7 +59,7 @@ const ContactUs = () => {
           <h1 className="text-3xl font-bold text-center lg:text-left leading-tight">
             Contact Us
           </h1>
-          <p className="text-center lg:text-left text-gray-600 mt-2 font-[500]">
+          <p className="text-center lg:text-left text-gray-600 mt-2 font-[500] textClass">
             Have questions or want to start your content journey? Reach out to MaxWritings — we're here to help.
           </p>
 

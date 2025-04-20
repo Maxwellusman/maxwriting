@@ -79,7 +79,7 @@ body {
 }
 
 .maxwellClass {
-  @apply w-full px-4 md:px-6 lg:px-6 xl:px-10 2xl:px-0 max-w-sm md:max-w-3xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto
+  @apply w-full px-6 md:px-6 lg:px-6 xl:px-10 2xl:px-0 max-w-sm md:max-w-3xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto
 }
 
 .headingClass {
@@ -87,7 +87,7 @@ body {
 }
 
 .textClass {
-  @apply font-Poppins text-gray-700 py-5
+  @apply font-Poppins text-gray-700 py-5 tracking-wider leading-relaxed
 }
 
 .buttonClass {
