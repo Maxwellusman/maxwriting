@@ -4,6 +4,13 @@ import connectToDatabase from '../../../lib/mongodb';
 import User from '../../../models/User';
 import bcrypt from 'bcryptjs';
 
+// Environment configuration
+const isProduction = process.env.NODE_ENV === 'production';
+const baseUrl = isProduction ? 'https://maxwritings.com' : 'http://localhost:3000';
+const cookieDomain = isProduction ? 'maxwritings.com' : undefined;
+const cookiePrefix = isProduction ? '__Secure-' : '';
+const cookieSecure = isProduction;
+
 export default NextAuth({
   providers: [
     CredentialsProvider({
@@ -16,18 +23,30 @@ export default NextAuth({
         try {
           await connectToDatabase();
           const user = await User.findOne({ username: credentials?.username });
-          
-          if (!user) return null;
-          
+
+          if (!user) {
+            console.log('User not found');
+            throw new Error('Invalid credentials');
+          }
+
           const isValid = await bcrypt.compare(
             credentials?.password || '',
             user.password
           );
-          
-          return isValid ? { id: user._id.toString(), name: user.username } : null;
+
+          if (!isValid) {
+            console.log('Invalid password');
+            throw new Error('Invalid credentials');
+          }
+
+          return { 
+            id: user._id.toString(), 
+            name: user.username,
+            email: user.email || null
+          };
         } catch (error) {
           console.error('Authorization error:', error);
-          return null;
+          throw error;
         }
       }
     }),
@@ -35,17 +54,18 @@ export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60, // 1 hour
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        token.user = user;
       }
       return token;
     },
-    async session({ session, token }: any) {
-      session.user.id = token.id as string;
+    async session({ session, token }) {
+      session.user = token.user as any;
       return session;
     },
   },
@@ -54,19 +74,36 @@ export default NextAuth({
     error: '/admin/login',
     signOut: '/admin/login'
   },
-  debug: process.env.NODE_ENV !== 'production',
+  debug: !isProduction, // Enable in development
+  useSecureCookies: cookieSecure,
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`, // Simplified name for cross-env compatibility
+      name: `${cookiePrefix}session-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        // Omit domain for localhost, set only for production
-        // domain: process.env.NODE_ENV === 'production' 
-        //   ? 'maxwritings.com' // No trailing slash
-        //   : undefined
+        secure: cookieSecure,
+        domain: cookieDomain
+      }
+    },
+    csrfToken: {
+      name: `${cookiePrefix}csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: cookieSecure,
+        domain: cookieDomain
+      }
+    },
+    callbackUrl: {
+      name: `${cookiePrefix}callback-url`,
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        secure: cookieSecure,
+        domain: cookieDomain
       }
     }
   }
