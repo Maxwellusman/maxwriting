@@ -43,7 +43,7 @@ const Banner: React.FC = () => {
               </p>
 
               {/* Stats */}
-              <div ref={ref} className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 justify-center items-start">
+              <div ref={ref} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 justify-center items-start">
                 {/* Happy Clients */}
                 <div className="flex flex-col items-center">
                   <div className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
