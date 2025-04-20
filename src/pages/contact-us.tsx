@@ -59,7 +59,7 @@ const ContactUs = () => {
           <h1 className="text-3xl font-bold text-center lg:text-left leading-tight">
             Contact Us
           </h1>
-          <p className="text-center lg:text-left text-gray-600 mt-2">
+          <p className="text-center lg:text-left text-gray-600 mt-2 font-[500]">
             Have questions or want to start your content journey? Reach out to MaxWritings — we're here to help.
           </p>
 
@@ -67,7 +67,7 @@ const ContactUs = () => {
             {/* Phone */}
             <div className="flex items-center justify-center lg:justify-start gap-3">
               <Phone size={24} className="text-primary-orange" />
-              <Link href="tel:+923136952876" className="text-gray-800 hover:text-blue-600 transition">
+              <Link href="tel:+923136952876" className="text-gray-800 hover:text-blue-600 transition font-[500]">
                 +92 313-695-2876
               </Link>
             </div>
@@ -75,7 +75,7 @@ const ContactUs = () => {
             {/* Email */}
             <div className="flex items-center justify-center lg:justify-start gap-3">
               <Mail size={24} className="text-primary-orange" />
-              <Link href="mailto:maxwritings@gmail.com" className="text-gray-800 hover:text-blue-600 transition">
+              <Link href="mailto:maxwritings@gmail.com" className="text-gray-800 hover:text-blue-600 transition font-[500]">
                 maxwritings@gmail.com
               </Link>
             </div>

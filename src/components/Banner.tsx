@@ -21,7 +21,7 @@ const Banner: React.FC = () => {
         objectFit="cover"
         quality={80}
         fill
-        priority // Add this to prioritize loading
+        priority
         className="fixed top-0 left-0 w-full h-full -z-10"
         sizes="100vw"
       />
@@ -34,29 +34,40 @@ const Banner: React.FC = () => {
         <h1 className="text-white font-bold font-prosto text-[24px] md:text-[36px] lg:text-[48px]">
           Best Writing Services
         </h1>
-        <p className="text-white font-Poppins text-[16px] md:text-[18px] mt-4 md:w-[80%] lg:w-[50%] mx-auto">
-          We at Max Writings® aim to build high-quality SEO-optimized articles to help your website rank on Google’s first page and grow your business.
+        <p className="text-white font-Poppins text-[16px] md:text-[18px] mt-4 md:w-[80%] lg:w-[50%] mx-auto font-bold">
+          We at Max Writings® aim to build high-quality SEO-optimized articles to help your website rank on Google's first page and grow your business.
         </p>
 
-        {/* Counters */}
-        <div ref={ref} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-gray-700 bg-opacity-90 p-6 rounded-lg">
-            <h2 className="text-primary-orange text-3xl font-bold">
-              {inView ? <CountUp end={99} duration={2} /> : 0}+
-            </h2>
-            <p className="text-white">Happy Clients</p>
+        {/* Counters - Now fully circular */}
+        <div ref={ref} className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6">
+          {/* Happy Clients */}
+          <div className="flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full bg-gray-700 bg-opacity-90 flex flex-col items-center justify-center">
+              <h2 className="text-primary-orange text-3xl font-bold">
+                {inView ? <CountUp end={99} duration={2} /> : 0}+
+              </h2>
+            </div>
+            <p className="text-white mt-2">Happy Clients</p>
           </div>
-          <div className="bg-gray-700 bg-opacity-90 p-6 rounded-lg">
-            <h2 className="text-primary-orange text-3xl font-bold">
-              {inView ? <CountUp end={10000} duration={3} separator="," /> : 0}+
-            </h2>
-            <p className="text-white">Articles Written</p>
+          
+          {/* Articles Written */}
+          <div className="flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full bg-gray-700 bg-opacity-90 flex flex-col items-center justify-center">
+              <h2 className="text-primary-orange text-3xl font-bold">
+                {inView ? <CountUp end={10000} duration={3} separator="," /> : 0}+
+              </h2>
+            </div>
+            <p className="text-white mt-2">Articles Written</p>
           </div>
-          <div className="bg-gray-700 bg-opacity-90 p-6 rounded-lg">
-            <h2 className="text-primary-orange text-3xl font-bold">
-              {inView ? <CountUp end={3} duration={2} /> : 0}+
-            </h2>
-            <p className="text-white">Years Experience</p>
+          
+          {/* Years Experience */}
+          <div className="flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full bg-gray-700 bg-opacity-90 flex flex-col items-center justify-center">
+              <h2 className="text-primary-orange text-3xl font-bold">
+                {inView ? <CountUp end={3} duration={2} /> : 0}+
+              </h2>
+            </div>
+            <p className="text-white mt-2">Years Experience</p>
           </div>
         </div>
       </div>

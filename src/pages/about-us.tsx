@@ -55,19 +55,19 @@ export default function AboutUs() {
 
       <div className="maxwellClass pt-10">
         <div>
-          <h1 className="font-raleway text-[20px] text-center mb-5 uppercase tracking-widest">
+          <h2 className="font-raleway text-[20px] text-center mb-5 uppercase tracking-widest font-[600]">
             About Us
-          </h1>
+          </h2>
           <h2 className="headingClass text-center">
             Professional Blog Writing & Publishing Experts
           </h2>
-          <p className="textClass text-center w-full xl:w-[72%] m-auto mt-4">
+          <p className="textClass text-center w-full xl:w-[72%] m-auto mt-4 font-[500]">
             At <strong>MaxWritings</strong>, we specialize in crafting SEO-optimized blog posts and
             website content that drives traffic, builds authority, and engages readers. Our team of
             experienced writers and editors works collaboratively to deliver content that aligns
             with your brand voice and digital strategy.
           </p>
-          <p className="textClass text-center w-full xl:w-[72%] m-auto mt-4">
+          <p className="textClass text-center w-full xl:w-[72%] m-auto mt-4 font-[500]">
             Whether you're a startup, a growing business, or an established brand, we provide
             tailored content writing services that support your marketing goals. From keyword-rich
             blogs to compelling landing pages, we write with search engines and humans in mind.

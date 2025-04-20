@@ -31,7 +31,7 @@ export default function HowWeWork() {
     return (
         <section className="py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <h2 className="font-raleway text-[20px] mb-5">
+                <h2 className="font-raleway text-[20px] mb-5 font-[500]">
                     HOW WE WORK
                 </h2>
                 
@@ -43,7 +43,7 @@ export default function HowWeWork() {
                         </p>
                     </div>
                     <div className='col-span-1'>
-                        <p className="textClass">
+                        <p className="textClass font-[500]">
                             Bring to the table win-win market strategies to ensure perfect articles. 
                         </p>
                     </div>
@@ -63,7 +63,7 @@ export default function HowWeWork() {
 
                             <div className="pt-16">
                                 <h3 className="text-xl font-bold mb-4 text-gray-800">{item.title}</h3>
-                                <p className="text-gray-600 mb-6">{item.description}</p>
+                                <p className="text-gray-600 mb-6 font-[500]">{item.description}</p>
 
                                 {item.cta && (
                                     <Link

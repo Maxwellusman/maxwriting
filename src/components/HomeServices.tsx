@@ -70,8 +70,8 @@ const HomeServices = () => {
               loading='lazy'
             />
             <div>
-              <h3 className=" text-[18px] md:text-[24px] text-center text-primary-orange">{service.title}</h3>
-              <p className='textClass text-center'>{service.description}</p>
+              <h3 className=" text-[18px] md:text-[24px] text-center text-primary-orange font-[500]">{service.title}</h3>
+              <p className='textClass text-center font-[500]'>{service.description}</p>
             </div>
           </div>
         ))}

@@ -108,7 +108,7 @@ export default function BlogPost() {
   if (isLoading) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 flex items-center justify-center">
       <div className="flex flex-col items-center">
-        <FiRefreshCw className="animate-spin text-4xl text-indigo-600 mb-4" />
+        <FiRefreshCw className="animate-spin text-4xl text-primary-orange mb-4" />
         <h2 className="text-2xl font-semibold text-gray-800">Loading Article</h2>
         <p className="text-gray-600 mt-2">Fetching the content for you...</p>
       </div>
@@ -124,7 +124,7 @@ export default function BlogPost() {
         <div className="flex gap-4 justify-center">
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-primary-orange text-white rounded-lg hover:bg-primary-orange transition-colors flex items-center gap-2"
           >
             <FiRefreshCw /> Retry
           </button>
@@ -147,7 +147,7 @@ export default function BlogPost() {
         <p className="text-gray-600 mb-6">The article you're looking for doesn't exist or may have been removed.</p>
         <button 
           onClick={() => router.push('/')}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 mx-auto"
+          className="px-6 py-2 bg-primary-orange text-white rounded-lg hover:bg-primary-orange transition-colors flex items-center gap-2 mx-auto"
         >
           <FiArrowLeft /> Browse Other Articles
         </button>
@@ -179,7 +179,7 @@ export default function BlogPost() {
             <div className="flex justify-between h-16 items-center">
               <button 
                 onClick={() => router.push('/blogs')}
-                className="flex items-center text-gray-700 hover:text-indigo-600 transition-colors"
+                className="flex items-center text-gray-700 hover:text-primary-orange transition-colors"
               >
                 <FiArrowLeft className="mr-2" /> Back to Blog
               </button>
@@ -187,7 +187,7 @@ export default function BlogPost() {
                 <div className="relative">
                   <button 
                     onClick={() => setIsShareOpen(!isShareOpen)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="px-4 py-2 bg-primary-orange text-white rounded-lg hover:bg-primary-orange transition-colors"
                   >
                     Share
                   </button>
