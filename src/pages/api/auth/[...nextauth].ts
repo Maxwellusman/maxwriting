@@ -65,7 +65,7 @@ export default NextAuth({
         secure: process.env.NODE_ENV === 'production',
         // Omit domain for localhost, set only for production
         domain: process.env.NODE_ENV === 'production' 
-          ? 'maxwritings.com' // No trailing slash
+          ? '.maxwritings.com' // No trailing slash
           : undefined
       }
     }
