@@ -7,7 +7,7 @@ const Footer = () => {
             <div className="maxwellClass pt-[8%]">
                 <div className="grid grid-cols-4 gap-5 ">
                     <div className="col-span-4 md:col-span-4 lg:col-span-1">
-                        <Image
+                        {/* <Image
                             src="/images/companylogo1.jpg"
                             width={100}
                             height={100}
@@ -15,7 +15,10 @@ const Footer = () => {
                             className="outline-none focus:outline-none"
                             draggable={false} // Prevent dragging
                             onContextMenu={(e) => e.preventDefault()} // Disables right-click
-                        />
+                        /> */}
+                        <Link href="/" className="text-xl font-semibold">
+                            Max Writings
+                        </Link>
                     </div>
                     {/* <div className="col-span-4 md:col-span-1 lg:col-span-1">
                         <h4 className="mb-4 text-[20px]  font-prosto">Services</h4>
@@ -58,7 +61,7 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className="col-span-4 md:col-span-1 lg:col-span-1">
-                    <h4 className="mb-4 text-[20px]  font-prosto ">Social</h4>
+                        <h4 className="mb-4 text-[20px]  font-prosto ">Social</h4>
                         <div className="flex justify-start items-center gap-3">
                             <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                                 <Facebook size={24} className="text-blue-500 hover:text-blue-600 transition-all cursor-pointer" />
