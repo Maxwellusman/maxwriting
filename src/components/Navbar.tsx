@@ -74,6 +74,7 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             className="lg:hidden text-gray-800"
+            aria-label="Mobile menu toggle"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}

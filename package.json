@@ -7,7 +7,7 @@
     "start": "next start",
     "lint": "next lint",
     "build": "next build",
-  "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@mantine/core": "^7.17.3",
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.3.1",
     "@types/formidable": "^3.4.5",
     "@types/mongodb": "^4.0.6",
     "@types/mongoose": "^5.11.96",

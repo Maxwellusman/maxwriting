@@ -15,21 +15,19 @@ const Banner: React.FC = () => {
     <div className="relative py-10 md:py-16 w-full min-h-screen flex items-center px-4">
       {/* Background Image */}
       <Image
-        src="/images/Rectangle 2.png" // Replace with your image path
+        src="/images/Rectangle 2.png" // Your image path
         alt="Background"
-        layout="fill"
-        objectFit="cover"
+        fill // Replaces `layout="fill"`
         quality={80}
-        fill
         priority
-        className="fixed top-0 left-0 w-full h-full -z-10"
+        className="fixed top-0 left-0 w-full h-full -z-10 object-cover" // `object-cover` replaces `objectFit="cover"`
         sizes="100vw"
       />
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-[#E9E8FB] bg-opacity-0"></div>
 
-      {/* Content Container */} 
+      {/* Content Container */}
       <div className='maxwellClass'>
         <div className="relative z-10 w-full mx-auto  max-w-7xl">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">

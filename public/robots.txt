@@ -3,6 +3,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
+Allow: /api/blogs
+
 # Host
 Host: https://maxwritings.com
 

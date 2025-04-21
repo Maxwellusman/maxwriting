@@ -63,19 +63,27 @@ const Footer = () => {
                     <div className="col-span-4 md:col-span-1 lg:col-span-1">
                         <h4 className="mb-4 text-[20px]  font-prosto ">Social</h4>
                         <div className="flex justify-start items-center gap-3">
-                            <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                            <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer"
+                            aria-label="Visit our Facebook page (opens in new tab)"
+                            >
                                 <Facebook size={24} className="text-blue-500 hover:text-blue-600 transition-all cursor-pointer" />
                             </Link>
 
-                            <Link href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                            <Link href="https://twitter.com" target="_blank" rel="noopener noreferrer"
+                            aria-label="Visit our Twitter page (opens in new tab)"
+                            >
                                 <Twitter size={24} className="text-blue-400 hover:text-blue-500 transition-all cursor-pointer" />
                             </Link>
 
-                            <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                            <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                            aria-label="Visit our Instagram page (opens in new tab)"
+                            >
                                 <Instagram size={24} className="text-pink-500 hover:text-pink-600 transition-all cursor-pointer" />
                             </Link>
 
-                            <Link href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+                            <Link href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                            aria-label="Visit our LinkedIn page (opens in new tab)"
+                            >
                                 <Linkedin size={24} className="text-blue-700 hover:text-blue-800 transition-all cursor-pointer" />
                             </Link>
                         </div>
