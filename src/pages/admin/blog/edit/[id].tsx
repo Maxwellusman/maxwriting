@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import TextStyle from '@tiptap/extension-text-style';
@@ -98,6 +98,11 @@ export default function EditBlogPost() {
       }),
     ],
     content: '',
+    editorProps: {
+      attributes: {
+        class: 'prose max-w-none focus:outline-none min-h-[300px] p-4',
+      },
+    },
     onUpdate: () => updateContentStats(),
   });
 
@@ -448,152 +453,190 @@ export default function EditBlogPost() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     Content <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleBold().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Bold
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleItalic().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Italic
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Underline
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      H1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      H2
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 3 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      H3
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Bullet List
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Numbered List
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Quote
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().toggleCode().run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Code
-                    </button>
-                    <button
-                      type="button"
-                      onClick={setLink}
-                      className={`px-3 py-1 rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().setTextAlign('left').run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'left' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Left
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().setTextAlign('center').run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'center' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Center
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor?.chain().focus().setTextAlign('right').run()}
-                      className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'right' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    >
-                      Right
-                    </button>
-                    <div className="relative inline-block">
-                      <select
-                        onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
-                        className="px-3 py-1 rounded bg-gray-200 appearance-none"
-                        value={editor?.getAttributes('textStyle').color || ''}
+                  
+                  {/* Sticky Toolbar */}
+                  <div className="sticky top-20 z-10 bg-white py-2 border-b">
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleBold().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                       >
-                        <option value="">Text Color</option>
-                        <option value="#000000">Black</option>
-                        <option value="#ffffff" className="bg-black">White</option>
-                        <option value="#ff0000" className="bg-red-500">Red</option>
-                        <option value="#00ff00" className="bg-green-500">Green</option>
-                        <option value="#0000ff" className="bg-blue-500">Blue</option>
-                        <option value="#ffff00" className="bg-yellow-500">Yellow</option>
-                        <option value="#ff00ff" className="bg-purple-500">Purple</option>
-                      </select>
-                    </div>
-                    <div className="relative inline-block">
-                      <select
-                        onChange={(e) => editor?.chain().focus().setHighlight({ color: e.target.value }).run()}
-                        className="px-3 py-1 rounded bg-gray-200 appearance-none"
-                        value={editor?.getAttributes('highlight').color || ''}
+                        Bold
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleItalic().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                       >
-                        <option value="">Highlight</option>
-                        <option value="#ffc078" className="bg-[#ffc078]">Orange</option>
-                        <option value="#8ce99a" className="bg-[#8ce99a]">Green</option>
-                        <option value="#74c0fc" className="bg-[#74c0fc]">Blue</option>
-                        <option value="#b197fc" className="bg-[#b197fc]">Purple</option>
-                        <option value="#ffa8a8" className="bg-[#ffa8a8]">Red</option>
-                        <option value="#ffe066" className="bg-[#ffe066]">Yellow</option>
-                      </select>
+                        Italic
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Underline
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        H1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        H2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('heading', { level: 3 }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        H3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Bullet List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Numbered List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().toggleCode().run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Code
+                      </button>
+                      <button
+                        type="button"
+                        onClick={setLink}
+                        className={`px-3 py-1 rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Link
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'left' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Left
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'center' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Center
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+                        className={`px-3 py-1 rounded ${editor?.isActive({ textAlign: 'right' }) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        Right
+                      </button>
+                      <div className="relative inline-block">
+                        <select
+                          onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
+                          className="px-3 py-1 rounded bg-gray-200 appearance-none"
+                          value={editor?.getAttributes('textStyle').color || ''}
+                        >
+                          <option value="">Text Color</option>
+                          <option value="#000000">Black</option>
+                          <option value="#ffffff" className="bg-black">White</option>
+                          <option value="#ff0000" className="bg-red-500">Red</option>
+                          <option value="#00ff00" className="bg-green-500">Green</option>
+                          <option value="#0000ff" className="bg-blue-500">Blue</option>
+                          <option value="#ffff00" className="bg-yellow-500">Yellow</option>
+                          <option value="#ff00ff" className="bg-purple-500">Purple</option>
+                        </select>
+                      </div>
+                      <div className="relative inline-block">
+                        <select
+                          onChange={(e) => editor?.chain().focus().setHighlight({ color: e.target.value }).run()}
+                          className="px-3 py-1 rounded bg-gray-200 appearance-none"
+                          value={editor?.getAttributes('highlight').color || ''}
+                        >
+                          <option value="">Highlight</option>
+                          <option value="#ffc078" className="bg-[#ffc078]">Orange</option>
+                          <option value="#8ce99a" className="bg-[#8ce99a]">Green</option>
+                          <option value="#74c0fc" className="bg-[#74c0fc]">Blue</option>
+                          <option value="#b197fc" className="bg-[#b197fc]">Purple</option>
+                          <option value="#ffa8a8" className="bg-[#ffa8a8]">Red</option>
+                          <option value="#ffe066" className="bg-[#ffe066]">Yellow</option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => editorImageInputRef.current?.click()}
+                        className="px-3 py-1 rounded bg-gray-200"
+                      >
+                        Insert Image
+                      </button>
+                      <input
+                        type="file"
+                        ref={editorImageInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={addDeviceImageToEditor}
+                      />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => editorImageInputRef.current?.click()}
-                      className="px-3 py-1 rounded bg-gray-200"
-                    >
-                      Insert Image
-                    </button>
-                    <input
-                      type="file"
-                      ref={editorImageInputRef}
-                      accept="image/*"
-                      className="hidden"
-                      onChange={addDeviceImageToEditor}
-                    />
                   </div>
-                  <div className="border p-3 rounded min-h-[200px] prose max-w-none">
+
+                  {/* Bubble Menu (appears when text is selected) */}
+                  {editor && (
+                    <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+                      <div className="flex gap-1 bg-white p-1 rounded shadow-lg border">
+                        <button
+                          onClick={() => editor.chain().focus().toggleBold().run()}
+                          className={`p-1 rounded ${editor.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        >
+                          Bold
+                        </button>
+                        <button
+                          onClick={() => editor.chain().focus().toggleItalic().run()}
+                          className={`p-1 rounded ${editor.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        >
+                          Italic
+                        </button>
+                        <button
+                          onClick={() => editor.chain().focus().toggleUnderline().run()}
+                          className={`p-1 rounded ${editor.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        >
+                          Underline
+                        </button>
+                        <button
+                          onClick={setLink}
+                          className={`p-1 rounded ${editor.isActive('link') ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        >
+                          Link
+                        </button>
+                      </div>
+                    </BubbleMenu>
+                  )}
+
+                  {/* Editor Content */}
+                  <div className="border rounded overflow-hidden">
                     <EditorContent editor={editor} />
                   </div>
                 </div>
@@ -685,7 +728,7 @@ export default function EditBlogPost() {
                     />
                   </div>
 
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <label className="block text-gray-700 text-sm font-bold mb-1">
                       Excerpt
                     </label>
@@ -697,7 +740,7 @@ export default function EditBlogPost() {
                       rows={3}
                       maxLength={170}
                     />
-                  </div>
+                  </div> */}
 
                   <div className="mb-3">
                     <label className="block text-gray-700 text-sm font-bold mb-1">Keywords</label>
