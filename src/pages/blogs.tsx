@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Head from 'next/head';
@@ -27,11 +27,28 @@ export default function Blogs() {
   const pageSize = 6;
   const siteUrl = 'https://maxwritings.com';
 
+  const cacheRef = useRef<{ [key: number]: BlogPostDocument[] }>({});
+
   useEffect(() => {
     const fetchPosts = async () => {
+      // Use cache first
+      if (cacheRef.current[currentPage]) {
+        setPosts(cacheRef.current[currentPage]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const res = await fetch(`/api/blog?page=${currentPage}&limit=${pageSize}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+        const res = await fetch(`/api/blog?page=${currentPage}&limit=${pageSize}`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.error || 'Failed to fetch posts');
@@ -41,6 +58,8 @@ export default function Blogs() {
             (a: BlogPostDocument, b: BlogPostDocument) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
+
+          cacheRef.current[currentPage] = sorted; // Store in cache
           setPosts(sorted);
           setTotalPages(data.pagination.totalPages);
         }
@@ -129,9 +148,8 @@ export default function Blogs() {
                               priority={currentPage === 1 && posts.indexOf(post) < 3}
                               unoptimized={post.imageUrl.includes('blob.vercel-storage.com')}
                               onError={() => handleImageError(post._id)}
-                              draggable={false} // Prevent dragging
-                              onContextMenu={(e) => e.preventDefault()} // Disables right-click
-
+                              draggable={false}
+                              onContextMenu={(e) => e.preventDefault()}
                             />
                           </div>
                         ) : (
@@ -143,9 +161,6 @@ export default function Blogs() {
                           <h2 className="text-[14px] font-semibold text-gray-900 mb-2 hover:text-primary-orange transition-colors">
                             {post.metaTitle || post.title}
                           </h2>
-                          {/* <p className="text-gray-600 mb-4 line-clamp-3">
-                            {post.metaDescription || post.excerpt || ''}
-                          </p> */}
                           <div className="mt-auto flex justify-between items-center">
                             <time
                               dateTime={new Date(post.createdAt).toISOString()}
@@ -157,8 +172,6 @@ export default function Blogs() {
                                 day: 'numeric',
                               })}
                             </time>
-
-
                           </div>
                           {post.writer && (
                             <span className="text-sm text-gray-500 mb-3">
