@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import Head from 'next/head';
@@ -17,74 +17,24 @@ export interface BlogPostDocument {
   writer?: string;
 }
 
-export default function Blogs() {
-  const [posts, setPosts] = useState<BlogPostDocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+interface BlogsProps {
+  posts: BlogPostDocument[] | null;
+  currentPage: number;
+  totalPages: number;
+}
+
+export default function Blogs({ posts, currentPage, totalPages }: BlogsProps) {
   const router = useRouter();
-  const pageSize = 6;
   const siteUrl = 'https://maxwritings.com';
-
-  const cacheRef = useRef<{ [key: number]: BlogPostDocument[] }>({});
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      // Use cache first
-      if (cacheRef.current[currentPage]) {
-        setPosts(cacheRef.current[currentPage]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-        const res = await fetch(`/api/blog?page=${currentPage}&limit=${pageSize}`, {
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch posts');
-
-        if (data.success) {
-          const sorted = data.data.sort(
-            (a: BlogPostDocument, b: BlogPostDocument) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-
-          cacheRef.current[currentPage] = sorted; // Store in cache
-          setPosts(sorted);
-          setTotalPages(data.pagination.totalPages);
-        }
-      } catch (err) {
-        console.error('Error fetching blog posts:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, [currentPage]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleImageError = (postId: string) => {
-    setImageErrors(prev => ({ ...prev, [postId]: true }));
-  };
 
   const seoTitle = `Read Expert Blog Posts on Writing | MaxWritings`;
   const seoDescription = `Explore professional blogs, expert writing tips, and industry updates. Stay informed with the latest from MaxWritings.`;
-  const canonicalUrl = `${siteUrl}${router.asPath}`;
+
+  const getCanonicalUrl = () => {
+    const path = router.asPath.split('?')[0].replace(/\/$/, '');
+    const pageSuffix = currentPage > 1 ? `?page=${currentPage}` : '';
+    return `${siteUrl}${path}${pageSuffix}`;
+  };
 
   return (
     <>
@@ -95,12 +45,12 @@ export default function Blogs() {
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:url" content={getCanonicalUrl()} />
         <meta property="og:site_name" content="MaxWritings" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <link rel="canonical" href={canonicalUrl} />
+        <link rel="canonical" href={getCanonicalUrl()} />
       </Head>
 
       <div className="min-h-screen bg-gray-50 py-12">
@@ -114,30 +64,17 @@ export default function Blogs() {
             </p>
           </header>
 
-          {loading ? (
-            <div className="grid gap-8 md:grid-cols-4 lg:grid-cols-6">
-              {[...Array(pageSize)].map((_, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="animate-pulse bg-gray-200 h-48 w-full"></div>
-                  <div className="p-6">
-                    <div className="animate-pulse bg-gray-200 h-7 w-4/5 mb-4 rounded"></div>
-                    <div className="animate-pulse bg-gray-200 h-4 w-3/5 mb-2 rounded"></div>
-                    <div className="animate-pulse bg-gray-200 h-4 w-2/5 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : posts.length > 0 ? (
+          {Array.isArray(posts) && posts.length > 0 ? (
             <>
               <main className="grid gap-8 md:grid-cols-4 lg:grid-cols-6">
-                {posts.map((post) => (
+                {posts.map((post, index) => (
                   <article
                     key={post._id}
                     className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
                   >
                     <Link href={`/blogs/${post.slug}`} passHref>
                       <div className="cursor-pointer h-full flex flex-col">
-                        {post.imageUrl && !imageErrors[post._id] ? (
+                        {post.imageUrl ? (
                           <div className="relative h-48 w-full">
                             <Image
                               src={post.imageUrl}
@@ -145,9 +82,8 @@ export default function Blogs() {
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              priority={currentPage === 1 && posts.indexOf(post) < 3}
+                              priority={currentPage === 1 && index < 3}
                               unoptimized={post.imageUrl.includes('blob.vercel-storage.com')}
-                              onError={() => handleImageError(post._id)}
                               draggable={false}
                               onContextMenu={(e) => e.preventDefault()}
                             />
@@ -192,17 +128,16 @@ export default function Blogs() {
                 <nav className="mt-12 flex justify-center" aria-label="Pagination">
                   <div className="flex space-x-2">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
+                      <Link
                         key={page}
-                        onClick={() => handlePageChange(page)}
-                        aria-current={currentPage === page ? 'page' : undefined}
-                        className={`px-4 py-2 rounded-md ${currentPage === page
+                        href={`/blogs?page=${page}`}
+                        className={`px-4 py-2 rounded-md ${page === currentPage
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-700 hover:bg-gray-100'
                           }`}
                       >
                         {page}
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </nav>
@@ -219,3 +154,34 @@ export default function Blogs() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const page = parseInt((context.query.page as string) || '1');
+  const limit = 6;
+
+  try {
+    const res = await fetch(`https://maxwritings.com/api/blog?page=${page}&limit=${limit}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.success || !Array.isArray(data.data)) {
+      throw new Error('Invalid response structure');
+    }
+
+    return {
+      props: {
+        posts: data.data,
+        currentPage: page,
+        totalPages: data.pagination.totalPages,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    return {
+      props: {
+        posts: [],
+        currentPage: page,
+        totalPages: 1,
+      },
+    };
+  }
+};
