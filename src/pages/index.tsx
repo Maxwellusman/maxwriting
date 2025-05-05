@@ -6,6 +6,7 @@ import Image from 'next/image';
 import HomeServices from '../components/HomeServices';
 import HomePrices from '../components/HomePrices';
 import WhyChooseImages from '@/components/WhyChooseImages';
+import BlogPostCarousel from '@/components/BlogPostCarousel';
 
 const Home = () => {
   const pageTitle = "Max Writings® | Professional SEO Content Writing Services";
@@ -135,15 +136,8 @@ const Home = () => {
               <h2 className='headingClass text-center'>Why Choose Our SEO Content Writing Services?</h2>
               <WhyChooseImages />
               <p className='textClass font-[500]'>
-                
                 Long story short, we started back in 2021 and have written more than 7000+ articles, including blogs, product pages, social media posts, and pretty much everything else. We have covered every industry, such as software, fashion, industrial machinery, car accessories, mobiles, protective wear clothing, photography items, capsule homes, rapid prototyping, casting, PVD coating, and so on. Last but not least, we don't ask you to trust our word because we always provide 1st article for free as a test. Only hire us if you like our free work.
               </p>
-
-              {/* <div className='my-10 mx-auto text-center '>
-                <a href="/contact" className='buttonClass' aria-label="Contact our SEO content writing team">
-                  Start Ranking Today
-                </a>
-              </div> */}
             </div>
           </div>
         </section>
@@ -158,6 +152,14 @@ const Home = () => {
         </section>
 
         <HomePrices />
+
+        {/* Blog Post Carousel Section */}
+        <section className="py-12 bg-gray-50">
+          <div className="maxwellClass">
+            <h2 className="headingClass text-center mb-8">Recent Blog Posts</h2>
+            <BlogPostCarousel />
+          </div>
+        </section>
       </main>
     </>
   )

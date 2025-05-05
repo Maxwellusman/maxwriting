@@ -10,6 +10,10 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '@/components/AdminLayout';
@@ -63,6 +67,7 @@ export default function EditBlogPost() {
     h2Count: 0,
     h3Count: 0,
     linkCount: 0,
+    tableCount: 0,
   });
 
   // Editor setup
@@ -96,6 +101,19 @@ export default function EditBlogPost() {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse border border-gray-400 w-full my-4',
+        },
+      }),
+      TableRow,
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'bg-gray-100',
+        },
+      }),
+      TableCell,
     ],
     content: '',
     editorProps: {
@@ -145,6 +163,7 @@ export default function EditBlogPost() {
       h2Count: (editorContent.match(/<h2/g) || []).length,
       h3Count: (editorContent.match(/<h3/g) || []).length,
       linkCount: (editorContent.match(/<a /g) || []).length,
+      tableCount: (editorContent.match(/<table/g) || []).length,
     });
   };
 
@@ -158,6 +177,7 @@ export default function EditBlogPost() {
     if (post.imageUrl) score += 10;
     if (contentStats.h2Count > 0) score += 10;
     if (contentStats.linkCount > 0) score += 5;
+    if (contentStats.tableCount > 0) score += 5;
     if (post.focusKeyword && editor?.getText().toLowerCase().includes(post.focusKeyword.toLowerCase())) score += 10;
     if (post.writer) score += 5;
     setSeoScore(Math.min(100, score));
@@ -237,6 +257,43 @@ export default function EditBlogPost() {
       editor?.chain().focus().setImage({ src: reader.result as string }).run();
     };
     reader.readAsDataURL(file);
+  };
+
+  // Table functions
+  const addTable = () => {
+    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
+
+  const deleteTable = () => {
+    editor?.chain().focus().deleteTable().run();
+  };
+
+  const addColumn = () => {
+    editor?.chain().focus().addColumnAfter().run();
+  };
+
+  const deleteColumn = () => {
+    editor?.chain().focus().deleteColumn().run();
+  };
+
+  const addRow = () => {
+    editor?.chain().focus().addRowAfter().run();
+  };
+
+  const deleteRow = () => {
+    editor?.chain().focus().deleteRow().run();
+  };
+
+  const toggleHeaderCell = () => {
+    editor?.chain().focus().toggleHeaderCell().run();
+  };
+
+  const mergeCells = () => {
+    editor?.chain().focus().mergeCells().run();
+  };
+
+  const splitCell = () => {
+    editor?.chain().focus().splitCell().run();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -600,6 +657,74 @@ export default function EditBlogPost() {
                         className="hidden"
                         onChange={addDeviceImageToEditor}
                       />
+                      {/* Table Controls */}
+                      <button
+                        type="button"
+                        onClick={addTable}
+                        className="px-3 py-1 rounded bg-gray-200"
+                      >
+                        Add Table
+                      </button>
+                      {editor?.isActive('table') && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={deleteTable}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Delete Table
+                          </button>
+                          <button
+                            type="button"
+                            onClick={addColumn}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Add Column
+                          </button>
+                          <button
+                            type="button"
+                            onClick={deleteColumn}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Delete Column
+                          </button>
+                          <button
+                            type="button"
+                            onClick={addRow}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Add Row
+                          </button>
+                          <button
+                            type="button"
+                            onClick={deleteRow}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Delete Row
+                          </button>
+                          <button
+                            type="button"
+                            onClick={toggleHeaderCell}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Toggle Header
+                          </button>
+                          <button
+                            type="button"
+                            onClick={mergeCells}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Merge Cells
+                          </button>
+                          <button
+                            type="button"
+                            onClick={splitCell}
+                            className="px-3 py-1 rounded bg-gray-200"
+                          >
+                            Split Cell
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -727,20 +852,6 @@ export default function EditBlogPost() {
                       maxLength={170}
                     />
                   </div>
-
-                  {/* <div className="mb-3">
-                    <label className="block text-gray-700 text-sm font-bold mb-1">
-                      Excerpt
-                    </label>
-                    <textarea
-                      name="excerpt"
-                      value={post.excerpt || ''}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      rows={3}
-                      maxLength={170}
-                    />
-                  </div> */}
 
                   <div className="mb-3">
                     <label className="block text-gray-700 text-sm font-bold mb-1">Keywords</label>
