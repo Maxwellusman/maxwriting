@@ -25,12 +25,14 @@ const BlogPostCarousel = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
         const response = await fetch('/api/blog?limit=6');
         const { data } = await response.json();
+        setImageError(false);
         setBlogPosts(data || []);
       } catch (err) {
         console.error('Error fetching blog posts:', err);
@@ -93,17 +95,19 @@ const BlogPostCarousel = () => {
         {blogPosts.map((post) => (
           <SwiperSlide key={post._id}>
             <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow duration-300">
-              {post.imageUrl ? (
-                <div className="relative h-48 w-full">
+              {post.imageUrl && !imageError ? (
+                <div className="relative h-96 w-full">
                   <Image
                     src={post.imageUrl}
                     alt={post.title}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={false}
-                    unoptimized={process.env.NODE_ENV !== 'production'} // Only optimize in production
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1000px"
+                    unoptimized={post.imageUrl.includes('blob.vercel-storage.com')}
+                    onError={() => setImageError(true)}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
               ) : (
                 <div className="bg-gray-100 h-48 w-full flex items-center justify-center">
@@ -117,7 +121,7 @@ const BlogPostCarousel = () => {
                 )}
               </div>
               <div className="px-6 pb-6">
-                <Link 
+                <Link
                   href={`/blogs/${post.slug}`} passHref
                   className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                   aria-label={`Read more about ${post.title}`}

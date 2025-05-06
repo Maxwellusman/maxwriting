@@ -232,7 +232,7 @@ export default function BlogPost() {
             {post.imageUrl && !imageError ? (
               <div className="relative h-96 w-full">
                 <Image
-                  src={post.imageUrl}
+                  src={post.imageUrl} 
                   alt={post.title}
                   fill
                   className="object-cover"
