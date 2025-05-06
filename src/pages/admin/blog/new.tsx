@@ -439,91 +439,6 @@ export default function NewBlogPost() {
         <div className="max-w-6xl mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-8">Create New Blog Post</h1>
 
-          <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 text-sm">
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Title</div>
-              <div className={`text-lg ${stats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
-                {stats.titleLength}/60
-              </div>
-            </div>
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Meta Desc</div>
-              <div className={`text-lg ${stats.metaDescLength > 160 ? 'text-red-500' : 'text-green-500'}`}>
-                {stats.metaDescLength}/160
-              </div>
-            </div>
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Words</div>
-              <div className="text-lg">
-                {stats.contentWords}
-                <span className="block text-xs">{stats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
-              </div>
-            </div>
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Transitions</div>
-              <div className={`text-lg ${transitionWordCount < 5 ? 'text-yellow-500' : 'text-green-500'}`}>
-                {transitionWordCount}
-                <span className="block text-xs">{transitionWordCount < 5 ? 'Add more' : 'Good'}</span>
-              </div>
-            </div>
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Images</div>
-              <div className="text-lg">
-                {stats.imageCount}
-                <span className="block text-xs">{stats.imageCount === 0 ? 'Add images' : 'Good'}</span>
-              </div>
-            </div>
-            <div className="text-center border-r pr-4">
-              <div className="font-semibold">Headings</div>
-              <div className="text-lg">
-                H2: {stats.h2Count}, H3: {stats.h3Count}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="font-semibold">Size</div>
-              <div className={`text-lg ${stats.contentSizeKB > 2048 ? 'text-red-500' : 'text-green-500'}`}>
-                {(stats.contentSizeKB / 1024).toFixed(2)}MB
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6 bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
-              <div className="w-full bg-gray-200 rounded-full h-4 max-w-md">
-                <div 
-                  className={`h-4 rounded-full ${
-                    seoScore >= 80 ? 'bg-green-500' :
-                    seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
-                  style={{ width: `${seoScore}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            {longParagraphErrors.length > 0 && (
-              <div className="mt-4 p-3 bg-red-50 rounded border border-red-200">
-                <h3 className="font-semibold mb-2 text-red-700">Content Structure Issues:</h3>
-                <ul className="list-disc pl-5 text-sm text-red-700">
-                  {longParagraphErrors.map((err, index) => (
-                    <li key={index}>{err}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {seoScore < 80 && ( 
-              <div className="mt-4">
-                <h3 className="font-semibold mb-2">Recommendations:</h3>
-                <ul className="list-disc pl-5 text-sm text-gray-700">
-                  {getSeoRecommendations().filter(rec => !longParagraphErrors.includes(rec)).map((rec, index) => (
-                    <li key={index}>{rec}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
@@ -948,6 +863,91 @@ export default function NewBlogPost() {
               </div>
             </div>
           </form>
+
+          <div className="mb-6 mt-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 text-sm">
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Title</div>
+              <div className={`text-lg ${stats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
+                {stats.titleLength}/60
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Meta Desc</div>
+              <div className={`text-lg ${stats.metaDescLength > 160 ? 'text-red-500' : 'text-green-500'}`}>
+                {stats.metaDescLength}/160
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Words</div>
+              <div className="text-lg">
+                {stats.contentWords}
+                <span className="block text-xs">{stats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Transitions</div>
+              <div className={`text-lg ${transitionWordCount < 5 ? 'text-yellow-500' : 'text-green-500'}`}>
+                {transitionWordCount}
+                <span className="block text-xs">{transitionWordCount < 5 ? 'Add more' : 'Good'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Images</div>
+              <div className="text-lg">
+                {stats.imageCount}
+                <span className="block text-xs">{stats.imageCount === 0 ? 'Add images' : 'Good'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Headings</div>
+              <div className="text-lg">
+                H2: {stats.h2Count}, H3: {stats.h3Count}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold">Size</div>
+              <div className={`text-lg ${stats.contentSizeKB > 2048 ? 'text-red-500' : 'text-green-500'}`}>
+                {(stats.contentSizeKB / 1024).toFixed(2)}MB
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6 bg-white p-4 rounded-lg shadow">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
+              <div className="w-full bg-gray-200 rounded-full h-4 max-w-md">
+                <div 
+                  className={`h-4 rounded-full ${
+                    seoScore >= 80 ? 'bg-green-500' :
+                    seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${seoScore}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            {longParagraphErrors.length > 0 && (
+              <div className="mt-4 p-3 bg-red-50 rounded border border-red-200">
+                <h3 className="font-semibold mb-2 text-red-700">Content Structure Issues:</h3>
+                <ul className="list-disc pl-5 text-sm text-red-700">
+                  {longParagraphErrors.map((err, index) => (
+                    <li key={index}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {seoScore < 80 && ( 
+              <div className="mt-4">
+                <h3 className="font-semibold mb-2">Recommendations:</h3>
+                <ul className="list-disc pl-5 text-sm text-gray-700">
+                  {getSeoRecommendations().filter(rec => !longParagraphErrors.includes(rec)).map((rec, index) => (
+                    <li key={index}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AdminLayout>
