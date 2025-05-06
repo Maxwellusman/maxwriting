@@ -18,6 +18,75 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '@/components/AdminLayout';
 
+// Transition words list
+const TRANSITION_WORDS = [
+  // Single words
+  'however', 'therefore', 'moreover', 'furthermore', 'consequently', 
+  'nevertheless', 'otherwise', 'meanwhile', 'nonetheless', 'similarly',
+  'additionally', 'hence', 'thus', 'accordingly', 'indeed', 'subsequently',
+  'conversely', 'likewise', 'thereby', 'ultimately', 'instead', 'rather',
+  'regardless', 'although', 'despite', 'finally', 'albeit', 'also', 'afterward',
+  'afterwards', 'basically', 'because', 'before', 'besides', 'but', 'certainly',
+  'chiefly', 'comparatively', 'concurrently', 'contrarily', 'correspondingly',
+  'doubtedly', 'during', 'e.g.', 'earlier', 'emphatically', 'equally', 'especially',
+  'eventually', 'evidently', 'explicitly', 'firstly', 'following', 'formerly',
+  'forthwith', 'fourthly', 'further', 'generally', 'henceforth', 'i.e.', 'identically',
+  'lastly', 'later', 'lest', 'likewise', 'markedly', 'meanwhile', 'nevertheless',
+  'nor', 'notwithstanding', 'obviously', 'occasionally', 'once', 'overall', 'particularly',
+  'presently', 'previously', 'rather', 'secondly', 'shortly', 'significantly', 'similarly',
+  'simultaneously', 'since', 'so', 'soon', 'specifically', 'still', 'straightaway',
+  'surely', 'surprisingly', 'than', 'then', 'thereafter', 'therefore', 'thereupon',
+  'thirdly', 'though', 'thus', 'till', 'undeniably', 'undoubtedly', 'unless', 'unlike',
+  'unquestionably', 'until', 'when', 'whenever', 'whereas', 'while',
+  
+  // Multiple words
+  'in conclusion', 'in summary', 'to summarize', 'as a result', 'for instance',
+  'for example', 'in particular', 'specifically', 'in addition', 'on the other hand',
+  'in contrast', 'by comparison', 'that is', 'to illustrate', 'to clarify', 'above all',
+  'after all', 'after that', 'all in all', 'all of a sudden', 'all things considered',
+  'although this may be true', 'another key point', 'as a matter of fact', 'as a result',
+  'as an illustration', 'as can be seen', 'as has been noted', 'as I have noted',
+  'as I have said', 'as I have shown', 'as long as', 'as much as', 'as shown above',
+  'as soon as', 'as well as', 'at any rate', 'at first', 'at last', 'at least',
+  'at length', 'at the present time', 'at the same time', 'at this instant',
+  'at this point', 'at this time', 'balanced against', 'being that', 'by all means',
+  'by and large', 'by comparison', 'by the same token', 'by the time', 'be that as it may',
+  'coupled with', 'different from', 'due to', 'equally important', 'even if', 'even more',
+  'even so', 'even though', 'first thing to remember', 'for fear that', 'for one thing',
+  'for that reason', 'for the most part', 'for the purpose of', 'for the same reason',
+  'for this purpose', 'for this reason', 'from time to time', 'given that',
+  'given these points', 'important to realize', 'in a word', 'in another case',
+  'in any case', 'in any event', 'in brief', 'in case', 'in detail', 'in due time',
+  'in effect', 'in either case', 'in essence', 'in fact', 'in general', 'in light of',
+  'in like fashion', 'in like manner', 'in order that', 'in order to', 'in other words',
+  'in particular', 'in reality', 'in short', 'in similar fashion', 'in spite of',
+  'in sum', 'in that case', 'in the event that', 'in the final analysis',
+  'in the first place', 'in the fourth place', 'in the hope that', 'in the light of',
+  'in the long run', 'in the meantime', 'in the same fashion', 'in the same way',
+  'in the second place', 'in the third place', 'in this case', 'in this situation',
+  'in time', 'in truth', 'in view of', 'most compelling evidence', 'most important',
+  'must be remembered', 'not to mention', 'now that', 'of course', 'on account of',
+  'on balance', 'on condition that', 'on one hand', 'on the condition that',
+  'on the contrary', 'on the negative side', 'on the other hand', 'on the positive side',
+  'on the whole', 'on this occasion', 'only if', 'owing to', 'point often overlooked',
+  'prior to', 'provided that', 'seeing that', 'so as to', 'so far', 'so long as',
+  'so that', 'sooner or later', 'such as', 'summing up', 'take the case of',
+  'that is to say', 'then again', 'this time', 'to be sure', 'to begin with',
+  'to demonstrate', 'to emphasize', 'to enumerate', 'to explain', 'to list',
+  'to point out', 'to put it another way', 'to put it differently', 'to repeat',
+  'to rephrase it', 'to say nothing of', 'to that end', 'to the end that',
+  'to this end', 'together with', 'under those circumstances', 'until now',
+  'up against', 'up to the present time', 'vis a vis', 'what\'s more',
+  'while it may be true', 'while this may be true', 'with attention to',
+  'with the result that', 'with this in mind', 'with this intention',
+  'with this purpose in mind', 'without a doubt', 'without delay',
+  'without doubt', 'without reservation',
+  
+  // Two-part transitions (stored as single strings)
+  'both … and', 'if … then', 'not only … but also', 'neither … nor',
+  'whether … or', 'no sooner … than'
+];
+
 interface BlogPost {
   _id: string;
   title: string;
@@ -57,6 +126,8 @@ export default function EditBlogPost() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [seoScore, setSeoScore] = useState(0);
+  const [transitionWordCount, setTransitionWordCount] = useState(0);
+  const [longParagraphErrors, setLongParagraphErrors] = useState<string[]>([]);
   const [contentStats, setContentStats] = useState({
     titleLength: 0,
     excerptLength: 0,
@@ -121,30 +192,48 @@ export default function EditBlogPost() {
         class: 'prose max-w-none focus:outline-none min-h-[300px] p-4',
       },
     },
-    onUpdate: () => updateContentStats(),
+    onUpdate: ({ editor }) => {
+      updateContentStats();
+      checkContentQuality(editor.getHTML());
+    },
   });
 
-  // Fetch post data
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await fetch(`/api/blog/${id}`);
-        const { data } = await res.json();
-        
-        if (data) {
-          setPost(data);
-          setKeywordsString(data.keywords?.join(', ') || '');
-          editor?.commands.setContent(data.content);
-          updateContentStats(data.content);
-        }
-      } catch (error) {
-        toast.error('Failed to load post');
-        console.error('Fetch error:', error);
-      }
-    };
+  // Check content quality including transition words and paragraph length
+  const checkContentQuality = (htmlContent: string) => {
+    // Check for transition words
+    const textContent = editor?.getText() || '';
+    const words = textContent.toLowerCase().split(/\s+/);
+    const transitionCount = words.filter(word =>
+      TRANSITION_WORDS.includes(word.toLowerCase())
+    ).length;
+    setTransitionWordCount(transitionCount);
 
-    if (id) fetchPost();
-  }, [id, editor]);
+    // Check for long paragraphs without headings
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const newErrors: string[] = [];
+    let wordCountSinceLastHeading = 0;
+
+    doc.body.childNodes.forEach((node) => {
+      if (node.nodeName === 'H2' || node.nodeName === 'H3') {
+        wordCountSinceLastHeading = 0;
+      } else if (node.nodeName === 'P') {
+        const text = node.textContent || '';
+        const wordCount = text.split(/\s+/).length;
+        wordCountSinceLastHeading += wordCount;
+
+        if (wordCountSinceLastHeading > 300) {
+          newErrors.push(`Section exceeds 300 words without heading. Add H2/H3 after ~300 words.`);
+        }
+
+        if (wordCount > 150) {
+          newErrors.push(`Paragraph too long (${wordCount} words). Consider breaking it up.`);
+        }
+      }
+    });
+
+    setLongParagraphErrors(newErrors);
+  };
 
   // Update content statistics
   const updateContentStats = (content?: string) => {
@@ -167,6 +256,29 @@ export default function EditBlogPost() {
     });
   };
 
+  // Fetch post data
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await fetch(`/api/blog/${id}`);
+        const { data } = await res.json();
+
+        if (data) {
+          setPost(data);
+          setKeywordsString(data.keywords?.join(', ') || '');
+          editor?.commands.setContent(data.content);
+          updateContentStats(data.content);
+          checkContentQuality(data.content);
+        }
+      } catch (error) {
+        toast.error('Failed to load post');
+        console.error('Fetch error:', error);
+      }
+    };
+
+    if (id) fetchPost();
+  }, [id, editor]);
+
   // Calculate SEO score
   useEffect(() => {
     let score = 0;
@@ -180,16 +292,17 @@ export default function EditBlogPost() {
     if (contentStats.tableCount > 0) score += 5;
     if (post.focusKeyword && editor?.getText().toLowerCase().includes(post.focusKeyword.toLowerCase())) score += 10;
     if (post.writer) score += 5;
+    if (transitionWordCount >= 5) score += 5;
     setSeoScore(Math.min(100, score));
-  }, [post, contentStats, editor]);
+  }, [post, contentStats, editor, transitionWordCount]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setPost(prev => ({ ...prev, [name]: value }));
 
     if (name === 'title') {
-      setPost(prev => ({ 
-        ...prev, 
+      setPost(prev => ({
+        ...prev,
         slug: value.toLowerCase().replace(/\s+/g, '-'),
         metaTitle: prev.metaTitle || (value.length > 60 ? value.substring(0, 57) + '...' : value)
       }));
@@ -298,7 +411,7 @@ export default function EditBlogPost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (contentStats.contentSizeKB > 2048) {
       toast.error('Content size exceeds 2MB limit! Cannot update.');
       return;
@@ -306,6 +419,11 @@ export default function EditBlogPost() {
 
     if (!post.writer) {
       toast.error('Please specify the writer name');
+      return;
+    }
+
+    if (longParagraphErrors.length > 0) {
+      toast.warning('Please fix the content structure issues before updating');
       return;
     }
 
@@ -348,6 +466,10 @@ export default function EditBlogPost() {
     if (contentStats.imageCount === 0) recommendations.push('Add at least one image');
     if (contentStats.linkCount === 0) recommendations.push('Add internal links to other posts');
     if (!post.imageUrl) recommendations.push('Add a featured image');
+    if (transitionWordCount < 5) recommendations.push(`Add more transition words (current: ${transitionWordCount})`);
+    if (longParagraphErrors.length > 0) {
+      recommendations.push(...longParagraphErrors);
+    }
     return recommendations;
   };
 
@@ -365,12 +487,12 @@ export default function EditBlogPost() {
     <AdminLayout>
       <div className="min-h-screen bg-gray-100 py-8">
         <ToastContainer position="top-right" autoClose={5000} />
-        
+
         <div className="max-w-6xl mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-8">Edit Blog Post</h1>
 
           {/* Content Stats */}
-          <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+          <div className="mb-6 bg-white p-4 rounded-lg shadow grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 text-sm">
             <div className="text-center border-r pr-4">
               <div className="font-semibold">Title</div>
               <div className={`text-lg ${contentStats.titleLength > 60 ? 'text-red-500' : 'text-green-500'}`}>
@@ -388,6 +510,13 @@ export default function EditBlogPost() {
               <div className="text-lg">
                 {contentStats.contentWords}
                 <span className="block text-xs">{contentStats.contentWords < 300 ? 'Add more content' : 'Good length'}</span>
+              </div>
+            </div>
+            <div className="text-center border-r pr-4">
+              <div className="font-semibold">Transitions</div>
+              <div className={`text-lg ${transitionWordCount < 5 ? 'text-yellow-500' : 'text-green-500'}`}>
+                {transitionWordCount}
+                <span className="block text-xs">{transitionWordCount < 5 ? 'Add more' : 'Good'}</span>
               </div>
             </div>
             <div className="text-center border-r pr-4">
@@ -416,21 +545,31 @@ export default function EditBlogPost() {
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-semibold">SEO Score: {seoScore}/100</h2>
               <div className="w-full bg-gray-200 rounded-full h-4 max-w-md">
-                <div 
-                  className={`h-4 rounded-full ${
-                    seoScore >= 80 ? 'bg-green-500' :
-                    seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
+                <div
+                  className={`h-4 rounded-full ${seoScore >= 80 ? 'bg-green-500' :
+                      seoScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
                   style={{ width: `${seoScore}%` }}
                 ></div>
               </div>
             </div>
-            
+
+            {longParagraphErrors.length > 0 && (
+              <div className="mt-4 p-3 bg-red-50 rounded border border-red-200">
+                <h3 className="font-semibold mb-2 text-red-700">Content Structure Issues:</h3>
+                <ul className="list-disc pl-5 text-sm text-red-700">
+                  {longParagraphErrors.map((err, index) => (
+                    <li key={index}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {seoScore < 80 && (
               <div className="mt-4">
                 <h3 className="font-semibold mb-2">Recommendations:</h3>
                 <ul className="list-disc pl-5 text-sm text-gray-700">
-                  {getSeoRecommendations().map((rec, index) => (
+                  {getSeoRecommendations().filter(rec => !longParagraphErrors.includes(rec)).map((rec, index) => (
                     <li key={index}>{rec}</li>
                   ))}
                 </ul>
@@ -510,7 +649,7 @@ export default function EditBlogPost() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     Content <span className="text-red-500">*</span>
                   </label>
-                  
+
                   {/* Sticky Toolbar */}
                   <div className="sticky top-20 z-10 bg-white py-2 border-b">
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -657,7 +796,6 @@ export default function EditBlogPost() {
                         className="hidden"
                         onChange={addDeviceImageToEditor}
                       />
-                      {/* Table Controls */}
                       <button
                         type="button"
                         onClick={addTable}
@@ -788,9 +926,9 @@ export default function EditBlogPost() {
                   </button>
                   {post.imageUrl && (
                     <div className="mt-2">
-                      <img 
-                        src={post.imageUrl} 
-                        alt="Featured" 
+                      <img
+                        src={post.imageUrl}
+                        alt="Featured"
                         className="w-full h-auto object-contain rounded border"
                       />
                       <button
@@ -812,7 +950,7 @@ export default function EditBlogPost() {
                 {/* SEO Fields */}
                 <div className="mb-4 p-4 border rounded-lg bg-blue-50">
                   <h3 className="font-bold text-lg mb-3 text-blue-800">SEO Settings</h3>
-                  
+
                   <div className="mb-3">
                     <label className="block text-gray-700 text-sm font-bold mb-1">Focus Keyword</label>
                     <input
@@ -865,17 +1003,30 @@ export default function EditBlogPost() {
                   </div>
                 </div>
 
+                {/* Excerpt */}
+                <div className="mb-4 p-4 border rounded-lg">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Excerpt</label>
+                  <textarea
+                    name="excerpt"
+                    value={post.excerpt || ''}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    rows={3}
+                    maxLength={300}
+                    placeholder="Brief summary of the post (appears in listings)"
+                  />
+                </div>
+
                 {/* Update Button */}
                 <button
                   type="submit"
                   disabled={isUpdating || contentStats.contentSizeKB > 2048}
-                  className={`w-full px-4 py-3 rounded-lg text-white font-bold ${
-                    isUpdating ? 'bg-blue-400' : 
-                    contentStats.contentSizeKB > 2048 ? 'bg-red-400' : 'bg-blue-600 hover:bg-blue-700'
-                  } transition`}
+                  className={`w-full px-4 py-3 rounded-lg text-white font-bold ${isUpdating ? 'bg-blue-400' :
+                      contentStats.contentSizeKB > 2048 ? 'bg-red-400' : 'bg-blue-600 hover:bg-blue-700'
+                    } transition`}
                 >
-                  {isUpdating ? 'Updating...' : 
-                  contentStats.contentSizeKB > 2048 ? 'Content too large (2MB max)' : 'Update Post'}
+                  {isUpdating ? 'Updating...' :
+                    contentStats.contentSizeKB > 2048 ? 'Content too large (2MB max)' : 'Update Post'}
                 </button>
               </div>
             </div>
