@@ -87,6 +87,10 @@ const TRANSITION_WORDS = [
   'whether … or', 'no sooner … than'
 ];
 
+function cleanWord(word: string): string {
+  return word.toLowerCase().replace(/^[.,;:!?"'()]+|[.,;:!?"'()]+$/g, '');
+}
+
 export default function NewBlogPost() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -191,11 +195,30 @@ export default function NewBlogPost() {
   const checkContentQuality = (htmlContent: string) => {
     // Check for transition words
     const textContent = editor?.getText() || '';
-    const words = textContent.toLowerCase().split(/\s+/);
-    const transitionCount = words.filter(word => 
-      TRANSITION_WORDS.includes(word.toLowerCase())
-    ).length;
-    setTransitionWordCount(transitionCount);
+    const normalizedContent = textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+    
+    // Count single-word transitions
+    const words = normalizedContent.split(/\s+/);
+    const singleWordCount = words.filter(word => {
+      const cleanedWord = cleanWord(word);
+      return TRANSITION_WORDS.some(transition => 
+        transition.split(' ').length === 1 && 
+        cleanedWord === transition.toLowerCase()
+      );
+    }).length;
+
+    // Count multi-word transitions
+    let multiWordCount = 0;
+    TRANSITION_WORDS.filter(transition => transition.split(' ').length > 1).forEach(transition => {
+      const regex = new RegExp(`\\b${transition.toLowerCase()}\\b`, 'g');
+      const matches = normalizedContent.match(regex);
+      if (matches) {
+        multiWordCount += matches.length;
+      }
+    });
+
+    const totalTransitionCount = singleWordCount + multiWordCount;
+    setTransitionWordCount(totalTransitionCount);
 
     // Check for long paragraphs without headings
     const parser = new DOMParser();
@@ -215,7 +238,7 @@ export default function NewBlogPost() {
           newErrors.push(`Section exceeds 300 words without heading. Add H2/H3 after ~300 words.`);
         }
         
-        if (wordCount > 150) {
+        if (wordCount > 300) {
           newErrors.push(`Paragraph too long (${wordCount} words). Consider breaking it up.`);
         }
       }
@@ -251,7 +274,7 @@ export default function NewBlogPost() {
     const newTitle = e.target.value;
     setTitle(newTitle);
     setSlug(newTitle.toLowerCase().replace(/\s+/g, '-'));
-    if (!metaTitle) setMetaTitle(newTitle.length > 60 ? newTitle.substring(0, 57) + '...' : newTitle);
+    if (!metaTitle) setMetaTitle(newTitle.length > 80 ? newTitle.substring(0, 77) + '...' : newTitle);
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -820,7 +843,7 @@ export default function NewBlogPost() {
                       value={metaTitle}
                       onChange={(e) => setMetaTitle(e.target.value)}
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      maxLength={70}
+                      maxLength={80}
                     />
                   </div>
 
